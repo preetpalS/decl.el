@@ -1,8 +1,9 @@
-;; -*- lexical-binding: t -*-
-;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
-;; Description: decl.el is an emacs lisp library for that enables you to organize your code in a declarative manner. https://github.com/preetpalS/decl.el
+;;; decl.el --- decl.el is an emacs lisp library for that enables you to organize your code in a declarative manner
+
 ;; Author: Preetpal S. Sohal
+;; URL: https://github.com/preetpalS/decl.el
 ;; Version: 0.0.1
+;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
 ;; License: GNU General Public License Version 3
 
 ;;;; DEPENDENCIES
@@ -693,3 +694,5 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
     (switch-to-buffer (get-buffer buffer-name-status-report))))
 
 (provide 'decl)
+
+;;; decl.el ends here
