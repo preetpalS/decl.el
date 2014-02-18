@@ -1,4 +1,4 @@
-;;; decl.el --- decl is an emacs lisp library for that enables you to organize your code in a declarative manner
+;;; decl.el --- Enables you to organize your code in a declarative manner
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
@@ -6,14 +6,20 @@
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
 ;; License: GNU General Public License Version 3
 
-;;;; DEPENDENCIES
-;; Emacs libraries
-(require 'cl)
-(require 'eieio)
-(require 'eieio-base)
-;; External libraries
-(require 'dash)
-;;;; END OF DEPENDENCIES
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
 
 ;; ;;; init.el --- sample init.el using library
 ;;
@@ -53,6 +59,18 @@
 ;; (provide 'init)
 ;;
 ;; ;;; init.el sample ends here
+
+;;; Code:
+
+;;;; DEPENDENCIES
+;; Emacs libraries
+(require 'cl)
+(require 'eieio)
+(require 'eieio-base)
+;; External libraries
+(require 'dash)
+;;;; END OF DEPENDENCIES
+
 
 ;; Variables that the user can modify to alter library behaviour. No tests needed for this code in isolation.
 (defgroup decl ()
@@ -569,6 +587,8 @@ unique."))))
         (prin1-to-string k))))))
 
 ;; Public functions
+
+;;;###autoload
 (defun decl-block (decl-block-keyword-name)
   "Creates a new 'decl-block' that is stored locally within this library.
 
@@ -584,6 +604,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
    (decl--block (decl--generate-increasing-number-string)
                 :keyword-name decl-block-keyword-name)))
 
+;;;###autoload
 (defun decl-node (decl-node-keyword-name 
                   decl-block-keyword-name
                   lambda-function-that-only-returns-t-or-nil-depending-on-node-execution
@@ -631,6 +652,7 @@ DEPENDENCIES must be a list of keywords.
                             :keyword-names-of-dependencies dependencies)
                 (oref decl-block-of-interest nodes)))))
 
+;;;###autoload
 (defun decl-solve (decl-block-keyword-name)
   "Attempts to execute the lambda functions stored within the 'decl-node' instances
 stored within the 'decl-block' referred to by the given DECL-BLOCK-KEYWORD-NAME.
@@ -644,6 +666,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
     (error "Attepmting to execute a decl-block that doesn't exist"))
   )
 
+;;;###autoload
 (defun decl-report (decl-block-keyword-name)
   "Reports on the solving of any 'decl-block' via 'decl-solve' in an org-mode buffer.
 
