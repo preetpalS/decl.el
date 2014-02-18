@@ -734,4 +734,4 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
 (provide 'decl)
 
-;;; decl.el ends here
+;;; decl ends here
