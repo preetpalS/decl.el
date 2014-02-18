@@ -1,4 +1,4 @@
-;;; decl --- decl is an emacs lisp library for that enables you to organize your code in a declarative manner
+;;; decl.el --- decl is an emacs lisp library for that enables you to organize your code in a declarative manner
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
@@ -734,4 +734,4 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
 (provide 'decl)
 
-;;; decl ends here
+;;; decl.el ends here
