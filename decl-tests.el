@@ -1,4 +1,3 @@
-
 (ert-deftest decl--test--decl--property-list-put-and-keep ()
   "Tests the function DECL--PROPERTY-LIST-PUT-AND-KEEP"
   (let ((temp nil))
