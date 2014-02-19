@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
 ;; License: GNU General Public License Version 3
 
@@ -478,17 +478,15 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
   (decl--decl--block--generate-data-structures-and-results this)
 
   (let ((plist-of-nodes
-         (copy-tree ; possibly unneccessary deep-copy operation
-          (decl--decl--block--access-item-from-generated-data-structures-and-results this :plist-of-nodes)))
+         (decl--decl--block--access-item-from-generated-data-structures-and-results this :plist-of-nodes))
+        (generated-data-structures-and-results (oref this generated-data-structures-and-results))
         (directed-graph-from-dependencies-to-nodes
-         (copy-tree ; possibly unneccessary deep-copy operation
-          (decl--decl--block--access-item-from-generated-data-structures-and-results 
-           this :directed-graph-from-dependencies-to-nodes)))
+         (decl--decl--block--access-item-from-generated-data-structures-and-results 
+          this :directed-graph-from-dependencies-to-nodes))
         (directed-graph-from-nodes-to-dependencies
-         (copy-tree ; possibly unneccessary deep-copy operation
           (decl--decl--block--access-item-from-generated-data-structures-and-results
-           this :directed-graph-from-nodes-to-dependencies))))
-    (defun decl--decl--block--solve--mark-as-unexectutable-recursively (vertex &optional execution-status)
+           this :directed-graph-from-nodes-to-dependencies)))
+    (defun decl--decl--block--solve--mark-as-unexectutable-recursively (vertex &optional failure-status)
       "vertex is a decl--node"
       (let ((e-keyword (oref vertex keyword-name)))
         (dolist (dependent-node-keyword (plist-get
@@ -497,8 +495,8 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
           (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
             (when (eq (oref ee execution-status) :null)
               (oset ee 
-                    execution-status (if execution-status execution-status :failed-via-failed-dependency))
-              (decl--decl--block--solve--mark-as-unexectutable-recursively ee execution-status))
+                    execution-status (if failure-status failure-status :failed-via-failed-dependency))
+              (decl--decl--block--solve--mark-as-unexectutable-recursively ee failure-status))
             )))) ;; End of defun
     (let ((non-existant-constraint-symbols (decl--decl--block--find-non-existant-dependencies this)))
       (dolist (e non-existant-constraint-symbols)
@@ -508,6 +506,13 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                            :keyword-name e
                            :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution (lambda () "dummy nil function" nil))
                (oref this nodes)))
+        (decl--property-list-put-and-keep
+         generated-data-structures-and-results
+         :plist-of-nodes
+         (decl--property-list-put-and-keep
+          plist-of-nodes
+          e
+          (car (oref this nodes))))
         (decl--property-list-put-and-keep directed-graph-from-nodes-to-dependencies e nil))
       (let ((symbols-of-nodes-that-have-non-existant-constraints
              (decl--decl--block--keyword-names-of-nodes-with-non-existant-constraints this))
@@ -518,22 +523,19 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
           (when (> (length e) 1)
             (dolist (e2 e)
               (decl--list-cons-and-keep circular-dependendent-node-symbols (plist-get e2 :value)))))
-        (let ((list-of-symbols-referring-to-nodes-which-should-not-be-executed
-               (-concat non-existant-constraint-symbols circular-dependendent-node-symbols symbols-of-nodes-that-have-non-existant-constraints))
-              (nodes (oref this nodes)))
+        (let ((nodes (oref this nodes)))
           (dolist (e nodes)
             (when (memq (oref e keyword-name) non-existant-constraint-symbols)
-              (unless (eq :null (oref e execution-status))
-                (oset e execution-status :non-existant-constraint)
-                (decl--decl--block--solve--mark-as-unexectutable-recursively e :non-existant-constraint))))
+              (when (eq :null (oref e execution-status))
+                (oset e execution-status :non-existant-constraint))))
           (dolist (e nodes)
             (when (memq (oref e keyword-name) symbols-of-nodes-that-have-non-existant-constraints)
-              (unless (eq :null (oref e execution-status))
+              (when (eq :null (oref e execution-status))
                 (oset e execution-status :depends-on-non-existant-constraint)
                 (decl--decl--block--solve--mark-as-unexectutable-recursively e :depends-on-non-existant-constraint))))
           (dolist (e nodes)
             (when (memq (oref e keyword-name) circular-dependendent-node-symbols)
-              (unless (eq :null (oref e execution-status))
+              (when (eq :null (oref e execution-status))
                 (oset e execution-status :involved-in-cyclical-relationship)
                 (decl--decl--block--solve--mark-as-unexectutable-recursively e :involved-in-cyclical-relationship))))
           
