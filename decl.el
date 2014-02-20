@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
 ;; License: GNU General Public License Version 3
 
