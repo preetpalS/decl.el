@@ -471,7 +471,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                    (progn
                      (setq stored-lambda-return-value :failed-via-throwing-error)
                      (oset this execution-error-message (error-message-string err)))))
-              (oset this execution-status (if (eq stored-lambda-return-value nil) :failed-via-returning-nil (if (eq :failed-via-failed-dependency stored-lambda-return-value) stored-lambda-return-value :successful))))))
+              (oset this execution-status (if (eq stored-lambda-return-value nil) :failed-via-returning-nil (if (eq :failed-via-throwing-error stored-lambda-return-value) stored-lambda-return-value :successful))))))
       (error "Attempting to execute a decl--node that has already been executed!"))))
 
 (defmethod decl--decl--block--solve ((this decl--block))
@@ -538,19 +538,18 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
               (when (eq :null (oref e execution-status))
                 (oset e execution-status :involved-in-cyclical-relationship)
                 (decl--decl--block--solve--mark-as-unexectutable-recursively e :involved-in-cyclical-relationship))))
-          
           (let ((decl-num-iter 0))
             (while (and (not (decl--decl--block--has-fate-been-determined this))
                         (not (> decl-num-iter 0)))
               (incf decl-num-iter)
-              (dolist (e nodes)
+              (dolist (node nodes)
                 ;; Final work done here
-                (when (eq (oref e execution-status) :null)
+                (when (eq (oref node execution-status) :null)
                   (setq decl-num-iter 0)
-                  (when (eq (oref e keyword-names-of-dependencies) nil)
-                    
-                    (if (decl--decl--node--execute e)
-                        (let ((e-keyword (oref e keyword-name)))
+                  (when (eq (oref node keyword-names-of-dependencies) nil)
+                    (decl--decl--node--execute node)
+                    (if (eq :successful (oref node execution-status))
+                        (let ((e-keyword (oref node keyword-name)))
                           (dolist (dependent-node-keyword (plist-get
                                                            directed-graph-from-dependencies-to-nodes
                                                            e-keyword))
@@ -559,7 +558,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                                     keyword-names-of-dependencies
                                     (-reject (lambda (x) (eq x e-keyword)) (oref ee keyword-names-of-dependencies)))
                               )))
-                      (decl--decl--block--solve--mark-as-unexectutable-recursively e))
+                      (decl--decl--block--solve--mark-as-unexectutable-recursively node))
                     ))))) ; End of while of execution of node
           )))))
 
@@ -677,7 +676,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 \(decl-report decl-block-keyword-name)"
   (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
   (let ((buffer-name-status-report 
-         (concat "Decl-Exec-Block: '" (symbol-name decl-block-keyword-name) "' Status Report.org")))
+         (concat "decl-block: '" (symbol-name decl-block-keyword-name) "' Status Report.org")))
     (with-current-buffer
         (get-buffer-create buffer-name-status-report)
       (insert

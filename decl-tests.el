@@ -125,7 +125,8 @@ WARNING 2: Only 'visually' verified!"
     (should (eq :involved-in-cyclical-relationship (oref (plist-get plist-of-nodes :evil) execution-status)))))
 
 (ert-deftest decl--test--decl-solve3 ()
-  "Tests the decl-solve function"
+  "Tests the decl-solve function.
+Tests library's handling of nodes that depend on missing constraints"
   (let ((decl--decl-block-holder nil)
         (decl--keyword-database (make-hash-table :test 'eq))
         (test nil)
@@ -145,3 +146,22 @@ WARNING 2: Only 'visually' verified!"
     (should (eq :depends-on-non-existant-constraint (oref (plist-get plist-of-nodes :evil) execution-status)))
     (should (eq :non-existant-constraint (oref (plist-get plist-of-nodes :disabled) execution-status)))))
 
+(ert-deftest decl--test--decl-solve4 ()
+  "Tests the decl-solve function. Straightforward test."
+  (let ((decl--decl-block-holder nil)
+        (decl--keyword-database (make-hash-table :test 'eq))
+        (test nil)
+        (plist-of-nodes nil))
+    (progn
+      (decl-block :test)
+      (decl-node :good :test (lambda () t))
+      (decl-node :bad :test (lambda () (error "ERROR")))
+      (decl-node :blessed :test (lambda () t) '(:good))
+      (decl-node :evil :test (lambda () t) '(:bad))
+      (decl-solve :test))
+    (setq test (plist-get decl--decl-block-holder :test))
+    (setq plist-of-nodes (decl--decl--block--access-item-from-generated-data-structures-and-results test :plist-of-nodes))
+    (should (eq :successful (oref (plist-get plist-of-nodes :good) execution-status)))
+    (should (eq :successful (oref (plist-get plist-of-nodes :blessed) execution-status)))
+    (should (eq :failed-via-throwing-error (oref (plist-get plist-of-nodes :bad) execution-status)))
+    (should (eq :failed-via-failed-dependency (oref (plist-get plist-of-nodes :evil) execution-status)))))
