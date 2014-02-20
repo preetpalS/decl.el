@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.3
+;; Version: 0.0.4
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
 ;; License: GNU General Public License Version 3
 
@@ -692,7 +692,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                  (successful-nodes nil))
              (let ((nodes (oref decl-exec-block nodes)))
                (dolist (node nodes)
-                 (let ((node-name (symbol-name (oref node keyword-name))))
+                 (let ((node-name (oref node keyword-name)))
                    (cond
                     ((eq (oref node execution-status) :null) (decl--list-cons-and-keep null-nodes node-name))
                     ((eq (oref node execution-status) :non-existant-constraint) (decl--list-cons-and-keep non-existant-nodes node-name))
@@ -718,6 +718,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
                (dolist (e failed-error-nodes)
                  (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n"))
+                 (decl--string-concat-and-keep to-return (concat "**** " "Error Message String" "\n"))
                  (decl--string-concat-and-keep to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message) "\n")))
 
                (decl--string-concat-and-keep to-return "** Nodes failing because of failing dependencies\n")
