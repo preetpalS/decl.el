@@ -455,6 +455,9 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
 (defmethod decl--decl--node--execute ((this decl--node))
   (let ((execution-status (oref this execution-status))
         (stored-lambda (oref this lambda-function-that-only-returns-t-or-nil-depending-on-node-execution)))
+    (print (concat "Executing decl-node: "
+                   (prin1-to-string (oref this keyword-name))))
+
     (if (eq execution-status :null)
         (if decl-config-fail-at-errors
             (let ((stored-lambda-return-value nil))
@@ -476,6 +479,9 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
 
 (defmethod decl--decl--block--solve ((this decl--block))
   (decl--decl--block--generate-data-structures-and-results this)
+  (print (concat "Loading decl-block '"
+                 (prin1-to-string (oref this keyword-name))
+                 "' . . ."))
 
   (let ((plist-of-nodes
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :plist-of-nodes))
@@ -560,7 +566,11 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                               )))
                       (decl--decl--block--solve--mark-as-unexectutable-recursively node))
                     ))))) ; End of while of execution of node
-          )))))
+          ))))
+
+  (print (concat "Decl-block '"
+                 (prin1-to-string (oref this keyword-name))
+                 "' solved!")))
 
 ;; Functions that might interact with user by throwing an error
 (defun decl--decl-block-keyword-name--type-check (decl-block-keyword-name)
