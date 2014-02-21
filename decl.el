@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.4
+;; Version: 0.0.5
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3"))
 ;; License: GNU General Public License Version 3
 
@@ -540,7 +540,15 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                 (oset e execution-status :depends-on-non-existant-constraint)
                 (decl--decl--block--solve--mark-as-unexectutable-recursively e :depends-on-non-existant-constraint))))
           (dolist (e nodes)
-            (when (memq (oref e keyword-name) circular-dependendent-node-symbols)
+            (when (or
+                   (memq (oref e keyword-name) circular-dependendent-node-symbols)
+
+                   ;; The next test is needed since strongly connected components
+                   ;; of size one may or may not indicate a cycle. This library
+                   ;; assumes that all nodes within a strongly connected component
+                   ;; of size 2 or greater are in a cyclical relationship with
+                   ;; each other.
+                   (memq (oref e keyword-name) (oref e keyword-names-of-dependencies)))
               (when (eq :null (oref e execution-status))
                 (oset e execution-status :involved-in-cyclical-relationship)
                 (decl--decl--block--solve--mark-as-unexectutable-recursively e :involved-in-cyclical-relationship))))
