@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.6
+;; Version: 0.0.7
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -774,6 +774,16 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
       (indent-region (region-beginning) (region-end)))
 
     (switch-to-buffer (get-buffer buffer-name-status-report))))
+
+;;;###autoload
+(defun decl-wrap (decl-library-usage-lambda)
+  "Place your usage of the decl library within a lambda function and pass it to decl-wrap to avoid retaining state. For example, if you want to define a build
+process using this library, like using a makefile, you can use wrap your code\within a decl-wrap block to avoid storing data time each run your build\process."
+  (if (functionp decl-library-usage-lambda)
+      (let ((decl--decl-block-holder nil)
+            (decl--keyword-database (make-hash-table :test 'eq)))
+        (funcall decl-library-usage-lambda))
+    (error "The function decl-wrap only takes a function as an argumant..")))
 
 (provide 'decl)
 
