@@ -63,13 +63,13 @@
 WARNING: This test is not robust! Failure of this test does not necessarily imply failure of the function this is testing! Comparison function is not adequate.
 WARNING 2: Only 'visually' verified!"
     (should (eq
-             (tree-equal
+             (cl-tree-equal
               (decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements
                '(1 (2) 2 (3) 3 (4) 4 nil))
               '(((:value 1 :index 3 :lowlink 3)) ((:value 2 :index 2 :lowlink 2)) ((:value 3 :index 1 :lowlink 1)) ((:value 4 :index 0 :lowlink 0))))
              t))
     (should (eq
-             (tree-equal
+             (cl-tree-equal
               (decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements
                '(1 (2 3) 2 (1) 3 (1) 4 (5) 5 nil))
               '(((:value 3 :index 2 :lowlink 2)) ((:value 1 :index 2 :lowlink 2) (:value 2 :index 4 :lowlink 3)) ((:value 4 :index 1 :lowlink 1)) ((:value 5 :index 0 :lowlink 0)))
@@ -77,7 +77,7 @@ WARNING 2: Only 'visually' verified!"
              t))
     (should 
      (eq
-      (tree-equal
+      (cl-tree-equal
        (decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements
         '(:a (:b :c) :b (:a) :c (:a) :d (:e) :e nil))
        '(((:value :c :index 2 :lowlink 2)) ((:value :a :index 2 :lowlink 2) (:value :b :index 4 :lowlink 3)) ((:value :d :index 1 :lowlink 1)) ((:value :e :index 0 :lowlink 0))))
