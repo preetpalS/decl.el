@@ -147,7 +147,8 @@ Tests library's handling of nodes that depend on missing constraints"
     (should (eq :non-existant-constraint (oref (plist-get plist-of-nodes :disabled) execution-status)))))
 
 (ert-deftest decl--test--decl-solve4 ()
-  "Tests the decl-solve function. Straightforward test."
+  "Tests the decl-solve function. Test involving a decl-node whose
+stored lambda function throws an error.."
   (let ((decl--decl-block-holder nil)
         (decl--keyword-database (make-hash-table :test 'eq))
         (test nil)
@@ -165,3 +166,79 @@ Tests library's handling of nodes that depend on missing constraints"
     (should (eq :successful (oref (plist-get plist-of-nodes :blessed) execution-status)))
     (should (eq :failed-via-throwing-error (oref (plist-get plist-of-nodes :bad) execution-status)))
     (should (eq :failed-via-failed-dependency (oref (plist-get plist-of-nodes :evil) execution-status)))))
+
+
+(ert-deftest decl--test--decl-solve5 ()
+  "Tests the decl-solve function. Tests the functionality of the defcustom
+variables 'decl-config-allow-duplicate-keyword-name-usage',
+'decl-config-allow-decl-blocks-to-be-overwritten', and
+'decl-config-allow-decl-nodes-to-be-overwritten' in the defgroup 'decl'."
+  (let ((decl--decl-block-holder nil)
+        (decl--keyword-database (make-hash-table :test 'eq))
+        (test nil)
+        (plist-of-nodes nil)
+        (decl-config-allow-duplicate-keyword-name-usage t)
+        (decl-config-allow-decl-blocks-to-be-overwritten t)
+        (decl-config-allow-decl-nodes-to-be-overwritten t))
+    (progn
+      (decl-block :test)
+      (decl-node :good :test (lambda () t))
+      (decl-node :bad :test (lambda () (error "ERROR")))
+      (decl-node :blessed :test (lambda () t) '(:good))
+      (decl-node :evil :test (lambda () t) '(:bad))
+      (decl-solve :test))
+    (setq test (plist-get decl--decl-block-holder :test))
+    (setq plist-of-nodes (decl--decl--block--access-item-from-generated-data-structures-and-results test :plist-of-nodes))
+    (should (eq :successful (oref (plist-get plist-of-nodes :good) execution-status)))
+    (should (eq :successful (oref (plist-get plist-of-nodes :blessed) execution-status)))
+    (should (eq :failed-via-throwing-error (oref (plist-get plist-of-nodes :bad) execution-status)))
+    (should (eq :failed-via-failed-dependency (oref (plist-get plist-of-nodes :evil) execution-status)))
+
+    (progn
+      (decl-block :test) ; Duplicate decl-node / keyword name reuse
+      (decl-node :good :test (lambda () t))
+      (decl-node :bad :test (lambda () (error "")))
+      (decl-node :bad :test (lambda () nil)) ; Duplicate decl-node / keyword name reuse
+      (decl-node :blessed :test (lambda () t) '(:good))
+      (decl-node :evil :test (lambda () t) '(:bad))
+      (decl-solve :test))
+    (setq test (plist-get decl--decl-block-holder :test))
+    (setq plist-of-nodes (decl--decl--block--access-item-from-generated-data-structures-and-results test :plist-of-nodes))
+    (should (eq :successful (oref (plist-get plist-of-nodes :good) execution-status)))
+    (should (eq :successful (oref (plist-get plist-of-nodes :blessed) execution-status)))
+    (should (eq :failed-via-returning-nil (oref (plist-get plist-of-nodes :bad) execution-status)))
+    (should (eq :failed-via-failed-dependency (oref (plist-get plist-of-nodes :evil) execution-status)))
+    ))
+
+(ert-deftest decl--test--decl-solve6 ()
+  "Tests the decl-solve function. Tests the functionality of the defcustom
+variable 'decl-config-fail-at-errors' in the defgroup 'decl'."
+  (let ((decl--decl-block-holder nil)
+        (decl--keyword-database (make-hash-table :test 'eq))
+        (test nil)
+        (decl-config-fail-at-errors t)
+        (plist-of-nodes nil))
+    (unwind-protect
+        (condition-case err
+            (progn
+              (decl-block :test)
+              (decl-node :bad :test (lambda () (error "SOLVE6 Error")))
+              (decl-solve :test))
+          (error
+           (setq test t)
+           (should (equal "SOLVE6 Error" (error-message-string err))))))
+    (unless test (error "FAIL"))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
