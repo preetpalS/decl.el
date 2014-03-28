@@ -3,6 +3,38 @@
 decl is an emacs lisp library for that enables you to organize your code in
 a declarative manner.
 
+## Background
+
+Configuring Emacs via writing Emacs Lisp can get compilicated especially when you want your Emacs configuration files to work across platforms such as Cygwin, Linux, Mac OS X and Windows and in both terminals and graphical user interfaces. If your configuration files are long and complicated you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking changes, debugging complications, and unwanted behaviour. decl.el is an attempt to alleviate some of these problems when configuring Emacs via Emacs Lisp code.
+
+## Instructions
+
+### User Steps (1 - 5)
+1. Logically separate Emacs Lisp code portions in your configuration files by the functionality that they add or modify within Emacs. Keep note of any dependencies that those portions of code may have.
+
+2. Wrap all of these separate portions of Emacs Lisp code in lambda functions that return a truthy value (non-nil) upon successful execution and return nil upon failure. If any lambda function throws an error upon execution, it is considered to have not executed successfully, equivalent to if it were to return nil.
+
+3. Create a decl-block and assign it a keyword name.
+
+4. For each lambda function, create a decl-node to place it in. Give each decl-node a keyword name, the keyword name of the decl-block that it belongs to, the lambda function to be placed within it, and optionally a list of the keyword names of the decl-nodes housing the lambda function's dependencies, all in the stated order. The dependencies of a lambda function are other lambda functions which must execute successfully in order for the lambda function to be executed successfully.
+
+5. Solve the decl-block.
+
+### Solver Steps (6 - 8) *(disregard if you are not interested in how this library works)*
+6. Disregard all unexecutable decl-nodes within decl-block. First find and disregard all nodes with non-existant nodes within their constraint lists. Second, taking into account all nodes with non-existing constraints, use Tarjan's Strongly Connected Components Algorithm to find and disregard all nodes involved in circular relationships of size greater than 1. Thirdly, disregard all remaining nodes which have themselves as one of their own constraints (circular relationships of size 1).
+
+7. Place all decl-nodes which have not been disregarded in a list.
+
+8. Keep on iterating over the list of decl-nodes, executing all nodes which have no remaining constraints. If the execution of a decl-node is successful, remove the decl-node's keyword name from all of the constraint lists of the remaining decl-nodes in the list. If the execution of a decl-node results in failure, remove all the decl-nodes in the list which have the executed decl-node's keyword name within their constraint list. Regardless of the success of a decl-node's execution, remove the executed decl-node from the list of nodes which have not been disregarded. If during one iteration over the list no decl-nodes are executed, stop iterating over the list.
+
+## Code
+
+Refer to decl.el
+
+## Tests
+
+Refer to decl-tests.el
+
 ## Sample Usage
 
 The following example assumes that you have installed this package via a package
