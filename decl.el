@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.7
+;; Version: 0.0.8
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -105,6 +105,11 @@ in order for this functionality to be become available."
 (defcustom decl-config-fail-at-errors nil
   "Set to a truthy value to prevent this library from catching errors when
 executing the lambda functions stored within 'decl-node' instances."
+  :type 'boolean
+  :group 'decl)
+
+(defcustom decl-config-print-execution-status-messages nil
+  "Set to a truthy value to allow this library to log execution status messages."
   :type 'boolean
   :group 'decl)
 
@@ -455,8 +460,9 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
 (defmethod decl--decl--node--execute ((this decl--node))
   (let ((execution-status (oref this execution-status))
         (stored-lambda (oref this lambda-function-that-only-returns-t-or-nil-depending-on-node-execution)))
-    (print (concat "Executing decl-node: "
-                   (prin1-to-string (oref this keyword-name))))
+    (when decl-config-print-execution-status-messages
+      (print (concat "Executing decl-node: "
+                     (prin1-to-string (oref this keyword-name)))))
 
     (if (eq execution-status :null)
         (if decl-config-fail-at-errors
@@ -479,9 +485,10 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
 
 (defmethod decl--decl--block--solve ((this decl--block))
   (decl--decl--block--generate-data-structures-and-results this)
-  (print (concat "Loading decl-block '"
-                 (prin1-to-string (oref this keyword-name))
-                 "' . . ."))
+  (when decl-config-print-execution-status-messages
+    (print (concat "Loading decl-block '"
+                   (prin1-to-string (oref this keyword-name))
+                   "' . . .")))
 
   (let ((plist-of-nodes
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :plist-of-nodes))
@@ -576,9 +583,10 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                     ))))) ; End of while of execution of node
           ))))
 
-  (print (concat "Decl-block '"
-                 (prin1-to-string (oref this keyword-name))
-                 "' solved!")))
+  (when decl-config-print-execution-status-messages
+    (print (concat "Decl-block '"
+                   (prin1-to-string (oref this keyword-name))
+                   "' solved!"))))
 
 ;; Functions that might interact with user by throwing an error
 (defun decl--decl-block-keyword-name--type-check (decl-block-keyword-name)
