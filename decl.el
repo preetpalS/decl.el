@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 0.0.8
+;; Version: 0.0.9
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -72,7 +72,7 @@
 ;;;; END OF DEPENDENCIES
 
 
-;; Variables that the user can modify to alter library behaviour. No tests needed for this code in isolation.
+;; Variables that the user can modify to alter library behaviour.
 (defgroup decl ()
   "Customize group for decl.el"
   :group 'lisp
@@ -114,25 +114,25 @@ executing the lambda functions stored within 'decl-node' instances."
   :group 'decl)
 
 
-;; Convience macros and functions. Tests are needed for this section
-(defmacro decl--property-list-put-and-keep (pl k v) ; tested
+;; Convience macros and functions.
+(defmacro decl--property-list-put-and-keep (pl k v)
   (list 'setq pl (list 'plist-put pl k v)))
 
-(defmacro decl--list-cons-and-keep (l e) ; tested
+(defmacro decl--list-cons-and-keep (l e)
   (list 'setq l (list 'cons e l)))
 
-(defmacro decl--string-concat-and-keep (s a) ; tested
+(defmacro decl--string-concat-and-keep (s a)
   (list 'setq s (list 'concat s a)))
 
-(defun decl--every-keywordp (l) (-every? (lambda (x) (keywordp x)) l)) ; tested
+(defun decl--every-keywordp (l) (-every? (lambda (x) (keywordp x)) l))
 
 (setq decl--increasing-count 0)
-(defun decl--generate-increasing-number-string () ; tested
-  "Generates number strings that are of increasing value each time this function is called"
+(defun decl--generate-increasing-number-string ()
+  "Generates number strings (like \"0\", \"1\", ...) that are of increasing value each time this function is called."
   (number-to-string (cl-incf decl--increasing-count)))
 
-(defun decl--property-list-keys (pl) ; tested
-  "Returns a new list contain the keys of the given plist: pl"
+(defun decl--property-list-keys (pl)
+  "Returns a new list contain the keys of the given plist, pl."
   (if (eq (mod (length pl) 2) 0)
       (let ((l nil) (leftover (cl-copy-seq pl)))
         (while (> (length leftover) 1)
@@ -143,28 +143,28 @@ executing the lambda functions stored within 'decl-node' instances."
 
 
 
-;; The following code is written purely to find cycles in a digraph
-;; It was written in a past version but not refactored for this release since
-;; it is somewhat independent of them main functionality of this library
+;; The following code finds cycles in a directed graph (functions contain "digraph" in names).
+;; It was written in a prior version of this library, but not refactored for this release since
+;; it is somewhat independent of them main functionality of this library.
 (defclass decl---digraph (eieio-named)
   ((edges
     :initarg :edges
     :initform nil
     :type list
     :custom string
-    :documentation "This is just a list of plists. Each plist edge has the keys :start and :end along with any number of other flags")
+    :documentation "A list of plists. Each plist edge has the keys :start and :end along with any number of other flags")
    (vertices
     :initarg :vertices
     :initform nil
     :type list
     :custom string
-    :documentation "This is just a list of plists. Each plist vertex has the key :value along with any number of other flags"))
+    :documentation "A list of plists. Each plist vertex has the key :value along with any number of other flags"))
   "Base library representation of a digraph. Edges and vertices are just represented as plists for flexibility and simplicity.")
 
 (defun decl---compare-plist-based-digraph-consisting-of-eq-able-elements (a b) ; Only used for debugging and testing
   "This function is for comparing two plist-based digraphs of the form:
 
-Let e be any eq-able element. A plist-based diagraph looks like the following: '(e (e e) e (e) e nil e nil)  "
+Let e be any eq-able element. A plist-based diagraph looks like the following: '(e (e e) e (e) e nil e nil)"
   (if (eq (length a) (length b))
       (let ((a-keys (decl--property-list-keys a))
             (b-keys (decl--property-list-keys b)))
@@ -183,11 +183,11 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
     nil))
 
 (defun decl---digraph-create-from-plist-based-digraph-consisting-of-eq-able-elements (g)
-  "g is a plist graph (eq-able elements key to a list of the same type of elements as the key)"
+  "g is a plist graph."
   (let ((edges nil) (vertices nil))
     (progn
       (cl-dolist (e g)
-        (when (not (listp e)) ; 'when' has an implicit progn
+        (when (not (listp e))
           (let ((vertex nil))
             (decl--property-list-put-and-keep vertex :value e)
             (decl--list-cons-and-keep vertices vertex)
@@ -202,17 +202,16 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
       (decl---digraph (decl--generate-increasing-number-string)
                       :edges edges :vertices vertices))))
 
-;; This is the only function that is called from this file by anything else
-;; within the library. It is only necessary to test this one function. Everything
-;; else in this file can be ignored
+;; This is the only function that is called to find cycles outside of the
+;; portion of code dedicated to finding cycles in a directed graph.
 (defun decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements (g)
-  "g is a plist graph (eq-able elements key to a list of the same type of elements as the key)"
+  "g is a plist graph (eq-able elements key to a list of the same type of elements as the key)."
   (let ((index 0)
         (s nil) ; Contains vertices, it is supposed to be a stack
         (sccs nil)
         (graph
          (decl---digraph-create-from-plist-based-digraph-consisting-of-eq-able-elements g)))
-    (defun decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect (v) "v is a vertex (plist with existing :value key)"
+    (defun decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect (v) "v is a vertex (plist with existing :value key)."
       (decl--property-list-put-and-keep v :index index)
       (decl--property-list-put-and-keep v :lowlink index)
       (cl-incf index)
@@ -254,14 +253,15 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
       (when (eq (plist-get vertex :index) nil)
         (decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect vertex)))
     sccs))
+;; End of the code finds cycles in a digraph.
 
 
 ;; Private library variables that hold state
 (defvar decl--decl-block-holder nil
-  "This property list contains alls 'decl-block' instances")
+  "This property list contains alls 'decl-block' instances.")
 
 (defvar decl--keyword-database (make-hash-table :test 'eq)
-  "This stores every keyword used to name a 'decl-block' or 'decl-node'")
+  "This stores every keyword used to name a 'decl-block' or 'decl-node'.")
 
 ;; Special type definition
 (cl-deftype decl--decl-node--execution-status ()
@@ -280,12 +280,12 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
   ((keyword-name
     :initarg :keyword-name
     :type keyword
-    :documentation "User-assigned keyword name")
+    :documentation "User-assigned keyword name.")
    (nodes
     :initarg :nodes
     :initform nil
     :type list
-    :documentation "Contains all decl-nodes that belong to this decl-block")
+    :documentation "Contains all decl-nodes that belong to this decl-block.")
    (generated-data-structures-and-results
     :initarg :generated-data-structures-and-results
     :initform nil
@@ -299,10 +299,10 @@ This slot is nil until decl-solve is called for this block.")))
   ((keyword-name
     :initarg :keyword-name
     :type keyword
-    :documentation "User-assigned keyword name")
+    :documentation "User-assigned keyword name.")
    (lambda-function-that-only-returns-t-or-nil-depending-on-node-execution
     :initarg :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution
-    :initform (lambda () "Empty lambda that always returns nil" nil)
+    :initform (lambda () "Empty lambda that always returns nil." nil)
     :type function
     :documentation "This function's execution will only be considered a failure if
 it returns nil or if it throws an error.")
@@ -310,23 +310,25 @@ it returns nil or if it throws an error.")
     :initarg :keyword-names-of-dependencies
     :initform nil
     :type list
-    :documentation "If this list is empty, the stored lambda will be executed.
+    :documentation "A list of keywords.
+
+If this list is empty, the stored lambda will be executed.
 If the list is not empty, the execution-status slot of all members of this list
 must be :successful for the stored lambda to be executed.")
    (execution-status
     :initarg :execution-status
     :initform :null
     :type decl--decl-node--execution-status
-    :documentation "Gives information about decl--node execution status")
+    :documentation "Gives information about decl--node execution status.")
    (execution-error-message
     :initarg :execution-error-message
     :initform ""
     :type string
-    :documentation "A place to store error messages from execution of stored lambda function")))
+    :documentation "A place to store error messages from execution of stored lambda function.")))
 
 (defmethod decl--decl--block--has-fate-been-determined ((this decl--block))
   "Iterates through the given decl--block's nodes slot and returns true if and
-only if all members of the list have their execution-status slot not set to :null"
+only if all members of the list have their execution-status slot not set to :null."
   (catch 'return
     (let ((nodes (oref this nodes)))
       (cl-dolist (node nodes)
@@ -346,7 +348,7 @@ The keyword :list-of-node-keyword-names indexes a list that stores the keywords
 refering to nodes within the given decl--block's generated-data-structures-and-results
 slot.
 
-The keyword :list-of-dependency-keyword-names indexes a list that store the keywords
+The keyword :list-of-dependency-keyword-names indexes a list that stores the keywords
 refering to dependencies within the given decl--block's generated-data-structures-and-results
 slot.
 
@@ -435,7 +437,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
       (plist-get
        (oref this generated-data-structures-and-results)
        keyword-key)
-    (error "Only keys of the type keyword are allowed to access values from generated-data-structures-and-results")))
+    (error "Only keys of the type keyword are allowed to access values from generated-data-structures-and-results.")))
 
 (defmethod decl--decl--block--find-non-existant-dependencies
   ((this decl--block))
@@ -500,7 +502,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
           (decl--decl--block--access-item-from-generated-data-structures-and-results
            this :directed-graph-from-nodes-to-dependencies)))
     (defun decl--decl--block--solve--mark-as-unexectutable-recursively (vertex &optional failure-status)
-      "vertex is a decl--node"
+      "vertex is a decl--node."
       (let ((e-keyword (oref vertex keyword-name)))
         (cl-dolist (dependent-node-keyword (plist-get
                                          directed-graph-from-dependencies-to-nodes
@@ -517,7 +519,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
          this nodes
          (cons (decl--node (decl--generate-increasing-number-string)
                            :keyword-name e
-                           :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution (lambda () "dummy nil function" nil))
+                           :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution (lambda () "Dummy nil function." nil))
                (oref this nodes)))
         (decl--property-list-put-and-keep
          generated-data-structures-and-results
@@ -610,14 +612,15 @@ unique."))))
         (decl--property-list-put-and-keep decl--decl-block-holder k v)
       (error
        (concat
-        "There is already a decl-block referred to by the keyword "
-        (prin1-to-string k))))))
+        "There is already a decl-block referred to by the keyword '"
+        (prin1-to-string k)
+        "'.")))))
 
 ;; Public functions
 
 ;;;###autoload
 (defun decl-block (decl-block-keyword-name)
-  "Creates a new 'decl-block' that is stored locally within this library.
+  "Creates a new 'decl-block' instance that is managed by library.
 
 DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
@@ -636,7 +639,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                   decl-block-keyword-name
                   lambda-function-that-only-returns-t-or-nil-depending-on-node-execution
                   &optional dependencies)
-  "Creates a new 'decl-node' that is stored within a 'decl-block' within library.
+  "Creates a new 'decl-node' instance that is stored within a 'decl-block'.
 
 DECL-NODE-KEYWORD-NAME must be a keyword.
 
@@ -657,7 +660,7 @@ DEPENDENCIES must be a list of keywords.
 
   (let ((decl-block-of-interest (plist-get decl--decl-block-holder decl-block-keyword-name)))
     (when (memq decl-node-keyword-name
-                (-map (lambda (x) "Gets keyword-name from decl--node" (oref x keyword-name))
+                (-map (lambda (x) "Gets keyword-name from decl--node." (oref x keyword-name))
                       (oref decl-block-of-interest nodes)))
       (unless decl-config-allow-decl-nodes-to-be-overwritten
         (error "Attempted to create a node using a keyword that is already used to refer to a node that is refering to another node with the existing decl-block!"))
@@ -690,7 +693,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
   (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
   (if (plist-member decl--decl-block-holder decl-block-keyword-name)
       (decl--decl--block--solve (plist-get decl--decl-block-holder decl-block-keyword-name))
-    (error "Attepmting to execute a decl-block that doesn't exist"))
+    (error "Attepmting to execute a decl-block that doesn't exist!"))
   )
 
 ;;;###autoload
@@ -785,13 +788,15 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
 ;;;###autoload
 (defun decl-wrap (decl-library-usage-lambda)
-  "Place your usage of the decl library within a lambda function and pass it to decl-wrap to avoid retaining state. For example, if you want to define a build
-process using this library, like using a makefile, you can use wrap your code\within a decl-wrap block to avoid storing data time each run your build\process."
+  "Place your usage of the decl library within a lambda function and pass it to
+decl-wrap to avoid retaining state. For example, if you want to define a build
+process using this library, like using a makefile, you can use wrap your code
+within a decl-wrap block to avoid storing data time each run your build process."
   (if (functionp decl-library-usage-lambda)
       (let ((decl--decl-block-holder nil)
             (decl--keyword-database (make-hash-table :test 'eq)))
         (funcall decl-library-usage-lambda))
-    (error "The function decl-wrap only takes a function as an argumant..")))
+    (error "The function decl-wrap only takes a function as an argumant!")))
 
 (provide 'decl)
 
