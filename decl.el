@@ -1,4 +1,4 @@
-;;; decl.el --- Enables you to organize your code in a declarative manner
+;;; decl.el --- Enables you to organize your code in a declarative manner.
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
@@ -36,7 +36,7 @@
 ;;    (decl-node :windows :init (lambda () (eq system-type 'windows-nt)))
 ;;    (decl-node :linux :init (lambda () (eq system-type 'gnu/linux)))
 ;;    (decl-node :gui :init (lambda () (if window-system t nil)))
-;;    (decl-node :mac-osx-fullscreen-supprt :init
+;;    (decl-node :mac-osx-fullscreen-support :init
 ;;               (lambda ()
 ;;                 (defun toggle-fullscreen (&optional f)
 ;;                   (interactive)
@@ -114,7 +114,7 @@ executing the lambda functions stored within 'decl-node' instances."
   :group 'decl)
 
 
-;; Convience macros and functions.
+;; Convenience macros and functions.
 (defmacro decl--property-list-put-and-keep (pl k v)
   (list 'setq pl (list 'plist-put pl k v)))
 
@@ -144,8 +144,8 @@ executing the lambda functions stored within 'decl-node' instances."
 
 
 ;; The following code finds cycles in a directed graph (functions contain "digraph" in names).
-;; It was written in a prior version of this library, but not refactored for this release since
-;; it is somewhat independent of them main functionality of this library.
+;; It was written in a prior version of this library, but not modified for this release since
+;; it is somewhat independent of the main functionality of this library.
 (defclass decl---digraph (eieio-named)
   ((edges
     :initarg :edges
@@ -164,7 +164,7 @@ executing the lambda functions stored within 'decl-node' instances."
 (defun decl---compare-plist-based-digraph-consisting-of-eq-able-elements (a b) ; Only used for debugging and testing
   "This function is for comparing two plist-based digraphs of the form:
 
-Let e be any eq-able element. A plist-based diagraph looks like the following: '(e (e e) e (e) e nil e nil)"
+Let e be any eq-able element. A plist-based digraph looks like the following: '(e (e e) e (e) e nil e nil)"
   (if (eq (length a) (length b))
       (let ((a-keys (decl--property-list-keys a))
             (b-keys (decl--property-list-keys b)))
@@ -240,7 +240,7 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
           (let ((scc nil))
             (catch 'break
               (while t
-                (setq w (car s)) ; set w to be the top elemnent in s
+                (setq w (car s)) ; set w to be the top element in s
                 (setq s (cdr s)) ; pop the top element off the stack s
                 (decl--list-cons-and-keep scc w)
                 (when (eq (plist-get w :value) (plist-get v :value))
@@ -258,7 +258,7 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
 
 ;; Private library variables that hold state
 (defvar decl--decl-block-holder nil
-  "This property list contains alls 'decl-block' instances.")
+  "This property list contains all 'decl-block' instances.")
 
 (defvar decl--keyword-database (make-hash-table :test 'eq)
   "This stores every keyword used to name a 'decl-block' or 'decl-node'.")
@@ -267,8 +267,8 @@ Let e be any eq-able element. A plist-based diagraph looks like the following: '
 (cl-deftype decl--decl-node--execution-status ()
             '(member
               :null
-              :non-existant-constraint
-              :depends-on-non-existant-constraint
+              :non-existent-constraint
+              :depends-on-non-existent-constraint
               :involved-in-cyclical-relationship
               :failed-via-failed-dependency
               :failed-via-throwing-error
@@ -345,11 +345,11 @@ The keyword :plist-of-nodes indexes a plist that maps keywords to decl--nodes
 within the given decl--block's generated-data-structures-and-results slot.
 
 The keyword :list-of-node-keyword-names indexes a list that stores the keywords
-refering to nodes within the given decl--block's generated-data-structures-and-results
+referring to nodes within the given decl--block's generated-data-structures-and-results
 slot.
 
 The keyword :list-of-dependency-keyword-names indexes a list that stores the keywords
-refering to dependencies within the given decl--block's generated-data-structures-and-results
+referring to dependencies within the given decl--block's generated-data-structures-and-results
 slot.
 
 The keyword :directed-graph-from-nodes-to-dependencies...
@@ -439,7 +439,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
        keyword-key)
     (error "Only keys of the type keyword are allowed to access values from generated-data-structures-and-results.")))
 
-(defmethod decl--decl--block--find-non-existant-dependencies
+(defmethod decl--decl--block--find-non-existent-dependencies
   ((this decl--block))
   (let ((list-of-dependency-keyword-names
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :list-of-dependency-keyword-names))
@@ -447,15 +447,15 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :list-of-node-keyword-names)))
     (-difference list-of-dependency-keyword-names list-of-node-keyword-names)))
 
-(defmethod decl--decl--block--keyword-names-of-nodes-with-non-existant-constraints
+(defmethod decl--decl--block--keyword-names-of-nodes-with-non-existent-constraints
   ((this decl--block))
   (let
       ((to-return nil)
        (directed-graph-from-dependencies-to-nodes
         (decl--decl--block--access-item-from-generated-data-structures-and-results
          this :directed-graph-from-dependencies-to-nodes))
-       (non-existant-constraint-keywords (decl--decl--block--find-non-existant-dependencies this)))
-    (cl-dolist (e non-existant-constraint-keywords)
+       (non-existent-constraint-keywords (decl--decl--block--find-non-existent-dependencies this)))
+    (cl-dolist (e non-existent-constraint-keywords)
       (decl--list-cons-and-keep to-return (plist-get directed-graph-from-dependencies-to-nodes e)))
     (-uniq (-flatten to-return))))
 
@@ -501,7 +501,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
         (directed-graph-from-nodes-to-dependencies
           (decl--decl--block--access-item-from-generated-data-structures-and-results
            this :directed-graph-from-nodes-to-dependencies)))
-    (defun decl--decl--block--solve--mark-as-unexectutable-recursively (vertex &optional failure-status)
+    (defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex &optional failure-status)
       "vertex is a decl--node."
       (let ((e-keyword (oref vertex keyword-name)))
         (cl-dolist (dependent-node-keyword (plist-get
@@ -511,10 +511,10 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
             (when (eq (oref ee execution-status) :null)
               (oset ee 
                     execution-status (if failure-status failure-status :failed-via-failed-dependency))
-              (decl--decl--block--solve--mark-as-unexectutable-recursively ee failure-status))
+              (decl--decl--block--solve--mark-as-not-executable-recursively ee failure-status))
             )))) ;; End of defun
-    (let ((non-existant-constraint-symbols (decl--decl--block--find-non-existant-dependencies this)))
-      (cl-dolist (e non-existant-constraint-symbols)
+    (let ((non-existent-constraint-symbols (decl--decl--block--find-non-existent-dependencies this)))
+      (cl-dolist (e non-existent-constraint-symbols)
         (oset 
          this nodes
          (cons (decl--node (decl--generate-increasing-number-string)
@@ -529,28 +529,28 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
           e
           (car (oref this nodes))))
         (decl--property-list-put-and-keep directed-graph-from-nodes-to-dependencies e nil))
-      (let ((symbols-of-nodes-that-have-non-existant-constraints
-             (decl--decl--block--keyword-names-of-nodes-with-non-existant-constraints this))
+      (let ((symbols-of-nodes-that-have-non-existent-constraints
+             (decl--decl--block--keyword-names-of-nodes-with-non-existent-constraints this))
             (sccs (decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements
                    directed-graph-from-nodes-to-dependencies))
-            (circular-dependendent-node-symbols nil))
+            (circular-dependent-node-symbols nil))
         (cl-dolist (e sccs)
           (when (> (length e) 1)
             (cl-dolist (e2 e)
-              (decl--list-cons-and-keep circular-dependendent-node-symbols (plist-get e2 :value)))))
+              (decl--list-cons-and-keep circular-dependent-node-symbols (plist-get e2 :value)))))
         (let ((nodes (oref this nodes)))
           (cl-dolist (e nodes)
-            (when (memq (oref e keyword-name) non-existant-constraint-symbols)
+            (when (memq (oref e keyword-name) non-existent-constraint-symbols)
               (when (eq :null (oref e execution-status))
-                (oset e execution-status :non-existant-constraint))))
+                (oset e execution-status :non-existent-constraint))))
           (cl-dolist (e nodes)
-            (when (memq (oref e keyword-name) symbols-of-nodes-that-have-non-existant-constraints)
+            (when (memq (oref e keyword-name) symbols-of-nodes-that-have-non-existent-constraints)
               (when (eq :null (oref e execution-status))
-                (oset e execution-status :depends-on-non-existant-constraint)
-                (decl--decl--block--solve--mark-as-unexectutable-recursively e :depends-on-non-existant-constraint))))
+                (oset e execution-status :depends-on-non-existent-constraint)
+                (decl--decl--block--solve--mark-as-not-executable-recursively e :depends-on-non-existent-constraint))))
           (cl-dolist (e nodes)
             (when (or
-                   (memq (oref e keyword-name) circular-dependendent-node-symbols)
+                   (memq (oref e keyword-name) circular-dependent-node-symbols)
 
                    ;; The next test is needed since strongly connected components
                    ;; of size one may or may not indicate a cycle. This library
@@ -560,7 +560,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                    (memq (oref e keyword-name) (oref e keyword-names-of-dependencies)))
               (when (eq :null (oref e execution-status))
                 (oset e execution-status :involved-in-cyclical-relationship)
-                (decl--decl--block--solve--mark-as-unexectutable-recursively e :involved-in-cyclical-relationship))))
+                (decl--decl--block--solve--mark-as-not-executable-recursively e :involved-in-cyclical-relationship))))
           (let ((decl-num-iter 0))
             (while (and (not (decl--decl--block--has-fate-been-determined this))
                         (not (> decl-num-iter 0)))
@@ -581,7 +581,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                                     keyword-names-of-dependencies
                                     (-reject (lambda (x) (eq x e-keyword)) (oref ee keyword-names-of-dependencies)))
                               )))
-                      (decl--decl--block--solve--mark-as-unexectutable-recursively node))
+                      (decl--decl--block--solve--mark-as-not-executable-recursively node))
                     ))))) ; End of while of execution of node
           ))))
 
@@ -663,7 +663,7 @@ DEPENDENCIES must be a list of keywords.
                 (-map (lambda (x) "Gets keyword-name from decl--node." (oref x keyword-name))
                       (oref decl-block-of-interest nodes)))
       (unless decl-config-allow-decl-nodes-to-be-overwritten
-        (error "Attempted to create a node using a keyword that is already used to refer to a node that is refering to another node with the existing decl-block!"))
+        (error "Attempted to create a node using a keyword that is already used to refer to a node that is referring to another node with the existing decl-block!"))
       
       (oset decl-block-of-interest nodes (-remove (lambda (x) (eq decl-node-keyword-name (oref x keyword-name))) (oref decl-block-of-interest nodes))))
 
@@ -693,7 +693,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
   (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
   (if (plist-member decl--decl-block-holder decl-block-keyword-name)
       (decl--decl--block--solve (plist-get decl--decl-block-holder decl-block-keyword-name))
-    (error "Attepmting to execute a decl-block that doesn't exist!"))
+    (error "Attempting to execute a decl-block that doesn't exist!"))
   )
 
 ;;;###autoload
@@ -712,8 +712,8 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
        (if (plist-member decl--decl-block-holder decl-block-keyword-name)
            (let ((decl-exec-block (plist-get decl--decl-block-holder decl-block-keyword-name))
                  (null-nodes nil)
-                 (non-existant-nodes nil)
-                 (non-existant-dependencies-nodes nil)
+                 (non-existent-nodes nil)
+                 (non-existent-dependencies-nodes nil)
                  (cyclical-relationship-nodes nil)
                  (failed-dependency-nodes nil)
                  (failed-error-nodes nil)
@@ -724,8 +724,8 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                  (let ((node-name (oref node keyword-name)))
                    (cond
                     ((eq (oref node execution-status) :null) (decl--list-cons-and-keep null-nodes node-name))
-                    ((eq (oref node execution-status) :non-existant-constraint) (decl--list-cons-and-keep non-existant-nodes node-name))
-                    ((eq (oref node execution-status) :depends-on-non-existant-constraint) (decl--list-cons-and-keep non-existant-dependencies-nodes node-name))
+                    ((eq (oref node execution-status) :non-existent-constraint) (decl--list-cons-and-keep non-existent-nodes node-name))
+                    ((eq (oref node execution-status) :depends-on-non-existent-constraint) (decl--list-cons-and-keep non-existent-dependencies-nodes node-name))
                     ((eq (oref node execution-status) :involved-in-cyclical-relationship) (decl--list-cons-and-keep cyclical-relationship-nodes node-name))
                     ((eq (oref node execution-status) :failed-via-failed-dependency) (decl--list-cons-and-keep failed-dependency-nodes node-name))
                     ((eq (oref node execution-status) :failed-via-throwing-error) (decl--list-cons-and-keep failed-error-nodes node-name))
@@ -760,14 +760,14 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                (cl-dolist (e cyclical-relationship-nodes)
                  (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (decl--string-concat-and-keep to-return "** Nodes relying on non-existant dependencies\n")
+               (decl--string-concat-and-keep to-return "** Nodes relying on non-existent dependencies\n")
 
-               (cl-dolist (e non-existant-dependencies-nodes)
+               (cl-dolist (e non-existent-dependencies-nodes)
                  (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (decl--string-concat-and-keep to-return "** Non-existant dependencies\n")
+               (decl--string-concat-and-keep to-return "** Non-existent dependencies\n")
 
-               (cl-dolist (e non-existant-nodes)
+               (cl-dolist (e non-existent-nodes)
                  (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
                (decl--string-concat-and-keep to-return "** Null nodes\n")
@@ -796,7 +796,7 @@ within a decl-wrap block to avoid storing data time each run your build process.
       (let ((decl--decl-block-holder nil)
             (decl--keyword-database (make-hash-table :test 'eq)))
         (funcall decl-library-usage-lambda))
-    (error "The function decl-wrap only takes a function as an argumant!")))
+    (error "The function decl-wrap only takes a function as an argument!")))
 
 (provide 'decl)
 

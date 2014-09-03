@@ -143,8 +143,8 @@ Tests library's handling of nodes that depend on missing constraints"
     (should (eq :successful (oref (plist-get plist-of-nodes :good) execution-status)))
     (should (eq :successful (oref (plist-get plist-of-nodes :blessed) execution-status)))
     (should (eq :failed-via-returning-nil (oref (plist-get plist-of-nodes :bad) execution-status)))
-    (should (eq :depends-on-non-existant-constraint (oref (plist-get plist-of-nodes :evil) execution-status)))
-    (should (eq :non-existant-constraint (oref (plist-get plist-of-nodes :disabled) execution-status)))))
+    (should (eq :depends-on-non-existent-constraint (oref (plist-get plist-of-nodes :evil) execution-status)))
+    (should (eq :non-existent-constraint (oref (plist-get plist-of-nodes :disabled) execution-status)))))
 
 (ert-deftest decl--test--decl-solve4 ()
   "Tests the decl-solve function. Test involving a decl-node whose
