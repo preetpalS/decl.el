@@ -1,4 +1,4 @@
-;;; decl.el --- Enables you to organize your code in a declarative manner.
+;;; decl.el --- Library for organizing code declaratively -*- lexical-binding: t; -*-
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
@@ -128,11 +128,11 @@ executing the lambda functions stored within 'decl-node' instances."
 
 (setq decl--increasing-count 0)
 (defun decl--generate-increasing-number-string ()
-  "Generates number strings (like \"0\", \"1\", ...) that are of increasing value each time this function is called."
+  "Generate number strings (like \"0\", \"1\", ...) that are of increasing value each time this function is called."
   (number-to-string (cl-incf decl--increasing-count)))
 
 (defun decl--property-list-keys (pl)
-  "Returns a new list contain the keys of the given plist, pl."
+  "Return new list containing the keys of the given plist, PL."
   (if (eq (mod (length pl) 2) 0)
       (let ((l nil) (leftover (cl-copy-seq pl)))
         (while (> (length leftover) 1)
@@ -183,7 +183,7 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
     nil))
 
 (defun decl---digraph-create-from-plist-based-digraph-consisting-of-eq-able-elements (g)
-  "g is a plist graph."
+  "G is a plist graph."
   (let ((edges nil) (vertices nil))
     (progn
       (cl-dolist (e g)
@@ -205,7 +205,7 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
 ;; This is the only function that is called to find cycles outside of the
 ;; portion of code dedicated to finding cycles in a directed graph.
 (defun decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements (g)
-  "g is a plist graph (eq-able elements key to a list of the same type of elements as the key)."
+  "G is a plist graph (eq-able elements key to a list of the same type of elements as the key)."
   (let ((index 0)
         (s nil) ; Contains vertices, it is supposed to be a stack
         (sccs nil)
@@ -437,7 +437,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
       (plist-get
        (oref this generated-data-structures-and-results)
        keyword-key)
-    (error "Only keys of the type keyword are allowed to access values from generated-data-structures-and-results.")))
+    (error "Only keys of the type keyword are allowed to access values from generated-data-structures-and-results")))
 
 (defmethod decl--decl--block--find-non-existent-dependencies
   ((this decl--block))
@@ -593,17 +593,17 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
 ;; Functions that might interact with user by throwing an error
 (defun decl--decl-block-keyword-name--type-check (decl-block-keyword-name)
   (unless (keywordp decl-block-keyword-name)
-    (error "DECL-BLOCK-KEYWORD-NAME must be of the type keyword.")))
+    (error "DECL-BLOCK-KEYWORD-NAME must be of the type keyword")))
 
 (defun decl--decl-node-keyword-name--type-check (decl-node-keyword-name)
   (unless (keywordp decl-node-keyword-name)
-    (error "DECL-NODE-KEYWORD-NAME must be of the type keyword.")))
+    (error "DECL-NODE-KEYWORD-NAME must be of the type keyword")))
 
 (defun decl--keyword-uniqueness-test (k)
   (unless decl-config-allow-duplicate-keyword-name-usage
     (when (gethash k decl--keyword-database)
       (error "Keywords that name 'decl-block' or 'decl-node' instances must be
-unique."))))
+unique"))))
 
 (defun decl--attempt-to-store-decl-block (k v)
   (if decl-config-allow-decl-blocks-to-be-overwritten
@@ -620,7 +620,7 @@ unique."))))
 
 ;;;###autoload
 (defun decl-block (decl-block-keyword-name)
-  "Creates a new 'decl-block' instance that is managed by library.
+  "Create new 'decl-block' instance that is managed by library.
 
 DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
@@ -645,18 +645,20 @@ DECL-NODE-KEYWORD-NAME must be a keyword.
 
 DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
+LAMBDA-FUNCTION-THAT-ONLY-RETURNS-T-OR-NIL-DEPENDING-ON-NODE-EXECUTION (self-explanatory).
+
 DEPENDENCIES must be a list of keywords.
 
 \(decl-node decl-node-keyword-name decl-block-keyword-name dependencies)"
   (decl--decl-node-keyword-name--type-check decl-node-keyword-name)
   (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
   (unless (functionp lambda-function-that-only-returns-t-or-nil-depending-on-node-execution)
-    (error "LAMBDA-FUNCTION-THAT-ONLY-RETURNS-T-OR-NIL-DEPENDING-ON-NODE-EXECUTION must be a lambda function."))
+    (error "LAMBDA-FUNCTION-THAT-ONLY-RETURNS-T-OR-NIL-DEPENDING-ON-NODE-EXECUTION must be a lambda function"))
 
   (decl--keyword-uniqueness-test decl-node-keyword-name)
 
   (unless (plist-member decl--decl-block-holder decl-block-keyword-name)
-    (error "Attempting to create a 'decl-node' for a 'decl-block' that does not exist."))
+    (error "Attempting to create a 'decl-node' for a 'decl-block' that does not exist"))
 
   (let ((decl-block-of-interest (plist-get decl--decl-block-holder decl-block-keyword-name)))
     (when (memq decl-node-keyword-name
@@ -684,7 +686,7 @@ DEPENDENCIES must be a list of keywords.
 
 ;;;###autoload
 (defun decl-solve (decl-block-keyword-name)
-  "Attempts to execute the lambda functions stored within the 'decl-node' instances
+  "Attempt to execute the lambda functions stored within the 'decl-node' instances
 stored within the 'decl-block' referred to by the given DECL-BLOCK-KEYWORD-NAME.
 
 DECL-BLOCK-KEYWORD-NAME must be a keyword.
@@ -777,7 +779,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
                to-return))
 
-         (error "Attempted to refer to a decl-block that does not exist.")))
+         (error "Attempted to refer to a decl-block that does not exist")))
 
       ;; These following lines make the newly created buffer an org-mode buffer and then indent the buffer accordingly
       (org-mode)
