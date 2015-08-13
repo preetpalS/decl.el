@@ -485,20 +485,6 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
               (oset this execution-status (if (eq stored-lambda-return-value nil) :failed-via-returning-nil (if (eq :failed-via-throwing-error stored-lambda-return-value) stored-lambda-return-value :successful))))))
       (error "Attempting to execute a decl--node that has already been executed!"))))
 
-;; Function that only needs to be visible to decl--decl--block--solve
-(defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex &optional failure-status)
-      "vertex is a decl--node."
-      (let ((e-keyword (oref vertex keyword-name)))
-        (cl-dolist (dependent-node-keyword (plist-get
-                                         directed-graph-from-dependencies-to-nodes
-                                         e-keyword))
-          (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
-            (when (eq (oref ee execution-status) :null)
-              (oset ee
-                    execution-status (if failure-status failure-status :failed-via-failed-dependency))
-              (decl--decl--block--solve--mark-as-not-executable-recursively ee failure-status))
-            ))))
-
 (defmethod decl--decl--block--solve ((this decl--block))
   (decl--decl--block--generate-data-structures-and-results this)
   (when decl-config-print-execution-status-messages
@@ -515,7 +501,18 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
         (directed-graph-from-nodes-to-dependencies
           (decl--decl--block--access-item-from-generated-data-structures-and-results
            this :directed-graph-from-nodes-to-dependencies)))
-
+    (defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex &optional failure-status)
+      "vertex is a decl--node."
+      (let ((e-keyword (oref vertex keyword-name)))
+        (cl-dolist (dependent-node-keyword (plist-get
+                                         directed-graph-from-dependencies-to-nodes
+                                         e-keyword))
+          (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
+            (when (eq (oref ee execution-status) :null)
+              (oset ee
+                    execution-status (if failure-status failure-status :failed-via-failed-dependency))
+              (decl--decl--block--solve--mark-as-not-executable-recursively ee failure-status))
+            )))) ;; End of defun
     (let ((non-existent-constraint-symbols (decl--decl--block--find-non-existent-dependencies this)))
       (cl-dolist (e non-existent-constraint-symbols)
         (oset
