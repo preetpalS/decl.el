@@ -27,7 +27,7 @@
 ;; (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 ;; (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 ;;
-;; (add-hook 
+;; (add-hook
 ;;  'after-init-hook
 ;;  (lambda () "Your init file"
 ;;    (require 'decl)
@@ -46,7 +46,7 @@
 ;;                                              (if (boundp 'old-fullscreen) old-fullscreen nil)
 ;;                                            (progn (setq old-fullscreen current-value)
 ;;                                                   'fullboth)))))
-;;                 
+;;
 ;;                 (base-lib-assign-keybindings '("C-s-<268632070>" toggle-fullscreen)) ; command-control-f
 ;;                 t)
 ;;               '(:gui :mac-osx))
@@ -246,7 +246,7 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
                 (when (eq (plist-get w :value) (plist-get v :value))
                   (throw 'break nil))))
 
-            (decl--list-cons-and-keep sccs scc))) ; End of if that creates and scc 
+            (decl--list-cons-and-keep sccs scc))) ; End of if that creates and scc
       )
 
     (cl-dolist (vertex (oref graph vertices))
@@ -375,7 +375,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
      generated-data-structures-and-results
      :plist-of-nodes
      plist-of-nodes)
-    
+
     ;; Generate list-of-node-keyword-names
     (cl-dolist
         (node nodes)
@@ -485,6 +485,20 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
               (oset this execution-status (if (eq stored-lambda-return-value nil) :failed-via-returning-nil (if (eq :failed-via-throwing-error stored-lambda-return-value) stored-lambda-return-value :successful))))))
       (error "Attempting to execute a decl--node that has already been executed!"))))
 
+;; Function that only needs to be visible to decl--decl--block--solve
+(defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex &optional failure-status)
+      "vertex is a decl--node."
+      (let ((e-keyword (oref vertex keyword-name)))
+        (cl-dolist (dependent-node-keyword (plist-get
+                                         directed-graph-from-dependencies-to-nodes
+                                         e-keyword))
+          (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
+            (when (eq (oref ee execution-status) :null)
+              (oset ee
+                    execution-status (if failure-status failure-status :failed-via-failed-dependency))
+              (decl--decl--block--solve--mark-as-not-executable-recursively ee failure-status))
+            ))))
+
 (defmethod decl--decl--block--solve ((this decl--block))
   (decl--decl--block--generate-data-structures-and-results this)
   (when decl-config-print-execution-status-messages
@@ -496,26 +510,15 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :plist-of-nodes))
         (generated-data-structures-and-results (oref this generated-data-structures-and-results))
         (directed-graph-from-dependencies-to-nodes
-         (decl--decl--block--access-item-from-generated-data-structures-and-results 
+         (decl--decl--block--access-item-from-generated-data-structures-and-results
           this :directed-graph-from-dependencies-to-nodes))
         (directed-graph-from-nodes-to-dependencies
           (decl--decl--block--access-item-from-generated-data-structures-and-results
            this :directed-graph-from-nodes-to-dependencies)))
-    (defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex &optional failure-status)
-      "vertex is a decl--node."
-      (let ((e-keyword (oref vertex keyword-name)))
-        (cl-dolist (dependent-node-keyword (plist-get
-                                         directed-graph-from-dependencies-to-nodes
-                                         e-keyword))
-          (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
-            (when (eq (oref ee execution-status) :null)
-              (oset ee 
-                    execution-status (if failure-status failure-status :failed-via-failed-dependency))
-              (decl--decl--block--solve--mark-as-not-executable-recursively ee failure-status))
-            )))) ;; End of defun
+
     (let ((non-existent-constraint-symbols (decl--decl--block--find-non-existent-dependencies this)))
       (cl-dolist (e non-existent-constraint-symbols)
-        (oset 
+        (oset
          this nodes
          (cons (decl--node (decl--generate-increasing-number-string)
                            :keyword-name e
@@ -577,7 +580,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                                                            directed-graph-from-dependencies-to-nodes
                                                            e-keyword))
                             (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
-                              (oset ee 
+                              (oset ee
                                     keyword-names-of-dependencies
                                     (-reject (lambda (x) (eq x e-keyword)) (oref ee keyword-names-of-dependencies)))
                               )))
@@ -635,7 +638,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                 :keyword-name decl-block-keyword-name)))
 
 ;;;###autoload
-(defun decl-node (decl-node-keyword-name 
+(defun decl-node (decl-node-keyword-name
                   decl-block-keyword-name
                   lambda-function-that-only-returns-t-or-nil-depending-on-node-execution
                   &optional dependencies)
@@ -664,7 +667,7 @@ DEPENDENCIES must be a list of keywords.
                       (oref decl-block-of-interest nodes)))
       (unless decl-config-allow-decl-nodes-to-be-overwritten
         (error "Attempted to create a node using a keyword that is already used to refer to a node that is referring to another node with the existing decl-block!"))
-      
+
       (oset decl-block-of-interest nodes (-remove (lambda (x) (eq decl-node-keyword-name (oref x keyword-name))) (oref decl-block-of-interest nodes))))
 
     (when dependencies
@@ -704,7 +707,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
 \(decl-report decl-block-keyword-name)"
   (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
-  (let ((buffer-name-status-report 
+  (let ((buffer-name-status-report
          (concat "decl-block: '" (symbol-name decl-block-keyword-name) "' Status Report.org")))
     (with-current-buffer
         (get-buffer-create buffer-name-status-report)
@@ -753,7 +756,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                (decl--string-concat-and-keep to-return "** Nodes failing because of failing dependencies\n")
 
                (cl-dolist (e failed-dependency-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))                 
+                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
                (decl--string-concat-and-keep to-return "** Nodes involved in cyclical relationships\n")
 
