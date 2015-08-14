@@ -705,88 +705,97 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
 \(decl-report decl-block-keyword-name)"
-  (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
-  (let ((buffer-name-status-report
-         (concat "decl-block: '" (symbol-name decl-block-keyword-name) "' Status Report.org")))
-    (with-current-buffer
-        (get-buffer-create buffer-name-status-report)
-      (insert
-       (if (plist-member decl--decl-block-holder decl-block-keyword-name)
-           (let ((decl-exec-block (plist-get decl--decl-block-holder decl-block-keyword-name))
-                 (null-nodes nil)
-                 (non-existent-nodes nil)
-                 (non-existent-dependencies-nodes nil)
-                 (cyclical-relationship-nodes nil)
-                 (failed-dependency-nodes nil)
-                 (failed-error-nodes nil)
-                 (failed-nil-nodes nil)
-                 (successful-nodes nil))
-             (let ((nodes (oref decl-exec-block nodes)))
-               (cl-dolist (node nodes)
-                 (let ((node-name (oref node keyword-name)))
-                   (cond
-                    ((eq (oref node execution-status) :null) (decl--list-cons-and-keep null-nodes node-name))
-                    ((eq (oref node execution-status) :non-existent-constraint) (decl--list-cons-and-keep non-existent-nodes node-name))
-                    ((eq (oref node execution-status) :depends-on-non-existent-constraint) (decl--list-cons-and-keep non-existent-dependencies-nodes node-name))
-                    ((eq (oref node execution-status) :involved-in-cyclical-relationship) (decl--list-cons-and-keep cyclical-relationship-nodes node-name))
-                    ((eq (oref node execution-status) :failed-via-failed-dependency) (decl--list-cons-and-keep failed-dependency-nodes node-name))
-                    ((eq (oref node execution-status) :failed-via-throwing-error) (decl--list-cons-and-keep failed-error-nodes node-name))
-                    ((eq (oref node execution-status) :failed-via-returning-nil) (decl--list-cons-and-keep failed-nil-nodes node-name))
-                    ((eq (oref node execution-status) :successful) (decl--list-cons-and-keep successful-nodes node-name))))))
+  (interactive "SEnter DECL-BLOCK-KEYWORD-NAME (must be a keyword): ")
+  (if (keywordp decl-block-keyword-name)
+      (progn
+        (decl--decl-block-keyword-name--type-check decl-block-keyword-name)
+        (let ((buffer-name-status-report
+               (concat "decl-block: '" (symbol-name decl-block-keyword-name) "' Status Report.org")))
+          (with-current-buffer
+              (get-buffer-create buffer-name-status-report)
+            ;; Mark buffer contents and delete the buffer contents
+            (mark-whole-buffer)
+            (delete-region (region-beginning) (region-end))
 
-             (let ((to-return (concat "* " buffer-name-status-report "\n")))
-               (decl--string-concat-and-keep to-return "** Nodes successfully executed\n")
+            ;; Insert generated report into buffer
+            (insert
+             (if (plist-member decl--decl-block-holder decl-block-keyword-name)
+                 (let ((decl-exec-block (plist-get decl--decl-block-holder decl-block-keyword-name))
+                       (null-nodes nil)
+                       (non-existent-nodes nil)
+                       (non-existent-dependencies-nodes nil)
+                       (cyclical-relationship-nodes nil)
+                       (failed-dependency-nodes nil)
+                       (failed-error-nodes nil)
+                       (failed-nil-nodes nil)
+                       (successful-nodes nil))
+                   (let ((nodes (oref decl-exec-block nodes)))
+                     (cl-dolist (node nodes)
+                       (let ((node-name (oref node keyword-name)))
+                         (cond
+                          ((eq (oref node execution-status) :null) (decl--list-cons-and-keep null-nodes node-name))
+                          ((eq (oref node execution-status) :non-existent-constraint) (decl--list-cons-and-keep non-existent-nodes node-name))
+                          ((eq (oref node execution-status) :depends-on-non-existent-constraint) (decl--list-cons-and-keep non-existent-dependencies-nodes node-name))
+                          ((eq (oref node execution-status) :involved-in-cyclical-relationship) (decl--list-cons-and-keep cyclical-relationship-nodes node-name))
+                          ((eq (oref node execution-status) :failed-via-failed-dependency) (decl--list-cons-and-keep failed-dependency-nodes node-name))
+                          ((eq (oref node execution-status) :failed-via-throwing-error) (decl--list-cons-and-keep failed-error-nodes node-name))
+                          ((eq (oref node execution-status) :failed-via-returning-nil) (decl--list-cons-and-keep failed-nil-nodes node-name))
+                          ((eq (oref node execution-status) :successful) (decl--list-cons-and-keep successful-nodes node-name))))))
 
-               (cl-dolist (e successful-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                   (let ((to-return (concat "* " buffer-name-status-report "\n")))
+                     (decl--string-concat-and-keep to-return "** Nodes successfully executed\n")
 
-               (decl--string-concat-and-keep to-return "** Nodes failing and returning nil\n")
+                     (cl-dolist (e successful-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (cl-dolist (e failed-nil-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                     (decl--string-concat-and-keep to-return "** Nodes failing and returning nil\n")
 
-               (decl--string-concat-and-keep to-return "** Nodes failing from throwing an error\n")
+                     (cl-dolist (e failed-nil-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (cl-dolist (e failed-error-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n"))
-                 (decl--string-concat-and-keep to-return (concat "**** " "Error Message String" "\n"))
-                 (decl--string-concat-and-keep to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message) "\n")))
+                     (decl--string-concat-and-keep to-return "** Nodes failing from throwing an error\n")
 
-               (decl--string-concat-and-keep to-return "** Nodes failing because of failing dependencies\n")
+                     (cl-dolist (e failed-error-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n"))
+                       (decl--string-concat-and-keep to-return (concat "**** " "Error Message String" "\n"))
+                       (decl--string-concat-and-keep to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message) "\n")))
 
-               (cl-dolist (e failed-dependency-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                     (decl--string-concat-and-keep to-return "** Nodes failing because of failing dependencies\n")
 
-               (decl--string-concat-and-keep to-return "** Nodes involved in cyclical relationships\n")
+                     (cl-dolist (e failed-dependency-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (cl-dolist (e cyclical-relationship-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                     (decl--string-concat-and-keep to-return "** Nodes involved in cyclical relationships\n")
 
-               (decl--string-concat-and-keep to-return "** Nodes relying on non-existent dependencies\n")
+                     (cl-dolist (e cyclical-relationship-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (cl-dolist (e non-existent-dependencies-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                     (decl--string-concat-and-keep to-return "** Nodes relying on non-existent dependencies\n")
 
-               (decl--string-concat-and-keep to-return "** Non-existent dependencies\n")
+                     (cl-dolist (e non-existent-dependencies-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (cl-dolist (e non-existent-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                     (decl--string-concat-and-keep to-return "** Non-existent dependencies\n")
 
-               (decl--string-concat-and-keep to-return "** Null nodes\n")
+                     (cl-dolist (e non-existent-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-               (cl-dolist (e null-nodes)
-                 (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                     (decl--string-concat-and-keep to-return "** Null nodes\n")
 
-               to-return))
+                     (cl-dolist (e null-nodes)
+                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
 
-         (error "Attempted to refer to a decl-block that does not exist")))
+                     to-return))
 
-      ;; These following lines make the newly created buffer an org-mode buffer and then indent the buffer accordingly
-      (org-mode)
-      (mark-whole-buffer)
-      (indent-region (region-beginning) (region-end)))
+               (error "Attempted to refer to a decl-block that does not exist")))
 
-    (switch-to-buffer (get-buffer buffer-name-status-report))))
+            ;; These following lines make the newly created buffer an org-mode buffer and then indent the buffer accordingly
+            (org-mode)
+            (mark-whole-buffer)
+            (indent-region (region-beginning) (region-end)))
+
+          (switch-to-buffer (get-buffer buffer-name-status-report)))) ; End of TRUE condition of keywordp conditional
+    (message "DECL-BLOCK-KEYWORD-NAME must be of the type keyword")))
 
 ;;;###autoload
 (defun decl-wrap (decl-library-usage-lambda)
