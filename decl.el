@@ -126,7 +126,7 @@ executing the lambda functions stored within 'decl-node' instances."
 
 (defun decl--every-keywordp (l) (-every? (lambda (x) (keywordp x)) l))
 
-(setq decl--increasing-count 0)
+(defvar decl--increasing-count 0)
 (defun decl--generate-increasing-number-string ()
   "Generate number strings (like \"0\", \"1\", ...) that are of increasing value each time this function is called."
   (number-to-string (cl-incf decl--increasing-count)))
@@ -237,7 +237,8 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
           )) ; End of cl-dolist that iterates over the edges in the graph
 
       (if (eq (plist-get v :lowlink) (plist-get v :index)) ; If v is a root node, pop the stack and generate an SCC
-          (let ((scc nil))
+          (let ((scc nil)
+                (w nil))
             (catch 'break
               (while t
                 (setq w (car s)) ; set w to be the top element in s
