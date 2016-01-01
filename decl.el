@@ -114,29 +114,27 @@ executing the lambda functions stored within 'decl-node' instances."
   :group 'decl)
 
 
-;; Convenience macros and functions.
-(defmacro decl--property-list-put-and-keep (pl k v)
+;; Convenience macros and functions ("!" indicates first argument will be mutated).
+(defmacro decl--plist-put! (pl k v)
   (list 'setq pl (list 'plist-put pl k v)))
 
-(defmacro decl--list-cons-and-keep (l e)
+(defmacro decl-cons! (l e)
   (list 'setq l (list 'cons e l)))
 
-(defmacro decl--string-concat-and-keep (s a)
+(defmacro decl--concat! (s a)
   (list 'setq s (list 'concat s a)))
-
-(defun decl--every-keywordp (l) (-every? (lambda (x) (keywordp x)) l))
 
 (defvar decl--increasing-count 0)
 (defun decl--generate-increasing-number-string ()
   "Generate number strings (like \"0\", \"1\", ...) that are of increasing value each time this function is called."
   (number-to-string (cl-incf decl--increasing-count)))
 
-(defun decl--property-list-keys (pl)
+(defun decl--plist-keys (pl)
   "Return new list containing the keys of the given plist, PL."
   (if (eq (mod (length pl) 2) 0)
       (let ((l nil) (leftover (cl-copy-seq pl)))
         (while (> (length leftover) 1)
-          (decl--list-cons-and-keep l (car leftover))
+          (decl-cons! l (car leftover))
           (setq leftover (nthcdr 2 leftover)))
         l)
     (error "Every plist must contain at an even number of elements!")))
@@ -166,8 +164,8 @@ executing the lambda functions stored within 'decl-node' instances."
 
 Let e be any eq-able element. A plist-based digraph looks like the following: '(e (e e) e (e) e nil e nil)"
   (if (eq (length a) (length b))
-      (let ((a-keys (decl--property-list-keys a))
-            (b-keys (decl--property-list-keys b)))
+      (let ((a-keys (decl--plist-keys a))
+            (b-keys (decl--plist-keys b)))
         (if (eq (length a-keys) (length (cl-union a-keys b-keys))) ; Tests if a-keys and b-keys contain all the same elements
             (catch 'return
               (progn
@@ -189,15 +187,15 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
       (cl-dolist (e g)
         (when (not (listp e))
           (let ((vertex nil))
-            (decl--property-list-put-and-keep vertex :value e)
-            (decl--list-cons-and-keep vertices vertex)
+            (decl--plist-put! vertex :value e)
+            (decl-cons! vertices vertex)
 
             (let ((l (plist-get g e)))
               (cl-dolist (e2 l)
                 (let ((edge nil))
-                  (decl--property-list-put-and-keep edge :start e)
-                  (decl--property-list-put-and-keep edge :end e2)
-                  (decl--list-cons-and-keep edges edge)))))))
+                  (decl--plist-put! edge :start e)
+                  (decl--plist-put! edge :end e2)
+                  (decl-cons! edges edge)))))))
 
       (decl---digraph (decl--generate-increasing-number-string)
                       :edges edges :vertices vertices))))
@@ -211,11 +209,12 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
         (sccs nil)
         (graph
          (decl---digraph-create-from-plist-based-digraph-consisting-of-eq-able-elements g)))
-    (defun decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect (v) "v is a vertex (plist with existing :value key)."
-      (decl--property-list-put-and-keep v :index index)
-      (decl--property-list-put-and-keep v :lowlink index)
+    (defun decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect (v)
+      "v is a vertex (plist with existing :value key)."
+      (decl--plist-put! v :index index)
+      (decl--plist-put! v :lowlink index)
       (cl-incf index)
-      (decl--list-cons-and-keep s v)
+      (decl-cons! s v)
 
       (cl-dolist (edge (oref graph edges))
         (when (eq (plist-get edge :start) (plist-get v :value))
@@ -227,11 +226,11 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
             (if (eq (plist-get w :index) nil)
                 (progn ; Successor w has not yet been visited; recurse on it
                   (decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect w)
-                  (decl--property-list-put-and-keep v :index (min (plist-get v :lowlink)
+                  (decl--plist-put! v :index (min (plist-get v :lowlink)
                                                                   (plist-get w :lowlink))))
               (cl-dolist (e s) ; Successor w is in stack S and hence in the current SCC
                 (when (eq (plist-get e :value) (plist-get w :value))
-                  (decl--property-list-put-and-keep v :lowlink (min (plist-get v :lowlink)
+                  (decl--plist-put! v :lowlink (min (plist-get v :lowlink)
                                                                     (plist-get w :index)))))
               )) ; End of let that defines the end vertex w
           )) ; End of cl-dolist that iterates over the edges in the graph
@@ -243,11 +242,11 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
               (while t
                 (setq w (car s)) ; set w to be the top element in s
                 (setq s (cdr s)) ; pop the top element off the stack s
-                (decl--list-cons-and-keep scc w)
+                (decl-cons! scc w)
                 (when (eq (plist-get w :value) (plist-get v :value))
                   (throw 'break nil))))
 
-            (decl--list-cons-and-keep sccs scc))) ; End of if that creates and scc
+            (decl-cons! sccs scc))) ; End of if that creates and scc
       )
 
     (cl-dolist (vertex (oref graph vertices))
@@ -366,13 +365,13 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
     ;; Generate plist-of-nodes
     (cl-dolist
         (node nodes)
-      (decl--property-list-put-and-keep
+      (decl--plist-put!
        plist-of-nodes
        (oref node keyword-name)
        node))
 
     ;; Store plist-of-nodes in generated-data-structures-and-results
-    (decl--property-list-put-and-keep
+    (decl--plist-put!
      generated-data-structures-and-results
      :plist-of-nodes
      plist-of-nodes)
@@ -380,10 +379,10 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
     ;; Generate list-of-node-keyword-names
     (cl-dolist
         (node nodes)
-      (decl--list-cons-and-keep list-of-node-keyword-names (oref node keyword-name)))
+      (decl-cons! list-of-node-keyword-names (oref node keyword-name)))
 
     ;; Store list-of-node-keyword-names in generated-data-structures-and-results
-    (decl--property-list-put-and-keep
+    (decl--plist-put!
      generated-data-structures-and-results
      :list-of-node-keyword-names
      list-of-node-keyword-names)
@@ -391,10 +390,10 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
     ;; Generate list-of-dependency-keyword-names
     (cl-dolist (node nodes)
       (cl-dolist (e (oref node keyword-names-of-dependencies))
-        (decl--list-cons-and-keep list-of-dependency-keyword-names e)))
+        (decl-cons! list-of-dependency-keyword-names e)))
 
     ;; Store list-of-dependency-keyword-names
-    (decl--property-list-put-and-keep
+    (decl--plist-put!
      generated-data-structures-and-results
      :list-of-dependency-keyword-names
      (-uniq list-of-dependency-keyword-names))
@@ -402,13 +401,13 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
     ;; Generate directed-graph-from-nodes-to-dependencies
     (cl-dolist (node nodes)
       (let ((k (oref node keyword-name)))
-        (decl--property-list-put-and-keep
+        (decl--plist-put!
          directed-graph-from-nodes-to-dependencies
          k
          (cl-copy-seq (oref node keyword-names-of-dependencies)))))
 
     ;; Store directed-graph-from-nodes-to-dependencies in generated-data-structures-and-results
-    (decl--property-list-put-and-keep
+    (decl--plist-put!
      generated-data-structures-and-results
      :directed-graph-from-nodes-to-dependencies
      directed-graph-from-nodes-to-dependencies)
@@ -417,7 +416,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
     (cl-dolist (node nodes)
       (let ((k (oref node keyword-name)))
         (cl-dolist (e (oref node keyword-names-of-dependencies))
-          (decl--property-list-put-and-keep
+          (decl--plist-put!
            directed-graph-from-dependencies-to-nodes
            e
            (cons k (plist-get
@@ -425,7 +424,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                     e))))))
 
     ;; Store directed-graph-from-dependencies-to-nodes in generated-data-structures-and-results
-    (decl--property-list-put-and-keep
+    (decl--plist-put!
      generated-data-structures-and-results
      :directed-graph-from-dependencies-to-nodes
      directed-graph-from-dependencies-to-nodes)
@@ -457,7 +456,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
          this :directed-graph-from-dependencies-to-nodes))
        (non-existent-constraint-keywords (decl--decl--block--find-non-existent-dependencies this)))
     (cl-dolist (e non-existent-constraint-keywords)
-      (decl--list-cons-and-keep to-return (plist-get directed-graph-from-dependencies-to-nodes e)))
+      (decl-cons! to-return (plist-get directed-graph-from-dependencies-to-nodes e)))
     (-uniq (-flatten to-return))))
 
 (defmethod decl--decl--node--execute ((this decl--node))
@@ -483,7 +482,11 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                    (progn
                      (setq stored-lambda-return-value :failed-via-throwing-error)
                      (oset this execution-error-message (error-message-string err)))))
-              (oset this execution-status (if (eq stored-lambda-return-value nil) :failed-via-returning-nil (if (eq :failed-via-throwing-error stored-lambda-return-value) stored-lambda-return-value :successful))))))
+              (oset this execution-status (if (eq stored-lambda-return-value nil)
+                                              :failed-via-returning-nil
+                                            (if (eq :failed-via-throwing-error stored-lambda-return-value)
+                                                stored-lambda-return-value
+                                              :successful))))))
       (error "Attempting to execute a decl--node that has already been executed!"))))
 
 (defmethod decl--decl--block--solve ((this decl--block))
@@ -522,14 +525,14 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                            :keyword-name e
                            :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution (lambda () "Dummy nil function." nil))
                (oref this nodes)))
-        (decl--property-list-put-and-keep
+        (decl--plist-put!
          generated-data-structures-and-results
          :plist-of-nodes
-         (decl--property-list-put-and-keep
+         (decl--plist-put!
           plist-of-nodes
           e
           (car (oref this nodes))))
-        (decl--property-list-put-and-keep directed-graph-from-nodes-to-dependencies e nil))
+        (decl--plist-put! directed-graph-from-nodes-to-dependencies e nil))
       (let ((symbols-of-nodes-that-have-non-existent-constraints
              (decl--decl--block--keyword-names-of-nodes-with-non-existent-constraints this))
             (sccs (decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements
@@ -538,7 +541,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
         (cl-dolist (e sccs)
           (when (> (length e) 1)
             (cl-dolist (e2 e)
-              (decl--list-cons-and-keep circular-dependent-node-symbols (plist-get e2 :value)))))
+              (decl-cons! circular-dependent-node-symbols (plist-get e2 :value)))))
         (let ((nodes (oref this nodes)))
           (cl-dolist (e nodes)
             (when (memq (oref e keyword-name) non-existent-constraint-symbols)
@@ -608,9 +611,9 @@ unique"))))
 
 (defun decl--attempt-to-store-decl-block (k v)
   (if decl-config-allow-decl-blocks-to-be-overwritten
-      (decl--property-list-put-and-keep decl--decl-block-holder k v)
+      (decl--plist-put! decl--decl-block-holder k v)
     (if (not (plist-get decl--decl-block-holder k))
-        (decl--property-list-put-and-keep decl--decl-block-holder k v)
+        (decl--plist-put! decl--decl-block-holder k v)
       (error
        (concat
         "There is already a decl-block referred to by the keyword '"
@@ -672,7 +675,7 @@ DEPENDENCIES must be a list of keywords.
 
     (when dependencies
       (if (listp dependencies)
-          (if (decl--every-keywordp dependencies)
+          (if (-every? (lambda (x) (keywordp x)) dependencies)
               (unless (eq (length (-uniq dependencies)) (length dependencies))
                 (error "All members of DEPENDENCIES must be unique!"))
             (error "All members of DEPENDENCIES must be keywords!"))
@@ -734,57 +737,57 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                      (cl-dolist (node nodes)
                        (let ((node-name (oref node keyword-name)))
                          (cond
-                          ((eq (oref node execution-status) :null) (decl--list-cons-and-keep null-nodes node-name))
-                          ((eq (oref node execution-status) :non-existent-constraint) (decl--list-cons-and-keep non-existent-nodes node-name))
-                          ((eq (oref node execution-status) :depends-on-non-existent-constraint) (decl--list-cons-and-keep non-existent-dependencies-nodes node-name))
-                          ((eq (oref node execution-status) :involved-in-cyclical-relationship) (decl--list-cons-and-keep cyclical-relationship-nodes node-name))
-                          ((eq (oref node execution-status) :failed-via-failed-dependency) (decl--list-cons-and-keep failed-dependency-nodes node-name))
-                          ((eq (oref node execution-status) :failed-via-throwing-error) (decl--list-cons-and-keep failed-error-nodes node-name))
-                          ((eq (oref node execution-status) :failed-via-returning-nil) (decl--list-cons-and-keep failed-nil-nodes node-name))
-                          ((eq (oref node execution-status) :successful) (decl--list-cons-and-keep successful-nodes node-name))))))
+                          ((eq (oref node execution-status) :null) (decl-cons! null-nodes node-name))
+                          ((eq (oref node execution-status) :non-existent-constraint) (decl-cons! non-existent-nodes node-name))
+                          ((eq (oref node execution-status) :depends-on-non-existent-constraint) (decl-cons! non-existent-dependencies-nodes node-name))
+                          ((eq (oref node execution-status) :involved-in-cyclical-relationship) (decl-cons! cyclical-relationship-nodes node-name))
+                          ((eq (oref node execution-status) :failed-via-failed-dependency) (decl-cons! failed-dependency-nodes node-name))
+                          ((eq (oref node execution-status) :failed-via-throwing-error) (decl-cons! failed-error-nodes node-name))
+                          ((eq (oref node execution-status) :failed-via-returning-nil) (decl-cons! failed-nil-nodes node-name))
+                          ((eq (oref node execution-status) :successful) (decl-cons! successful-nodes node-name))))))
 
                    (let ((to-return (concat "* " buffer-name-status-report "\n")))
-                     (decl--string-concat-and-keep to-return "** Nodes successfully executed\n")
+                     (decl--concat! to-return "** Nodes successfully executed\n")
 
                      (cl-dolist (e successful-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Nodes failing and returning nil\n")
+                     (decl--concat! to-return "** Nodes failing and returning nil\n")
 
                      (cl-dolist (e failed-nil-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Nodes failing from throwing an error\n")
+                     (decl--concat! to-return "** Nodes failing from throwing an error\n")
 
                      (cl-dolist (e failed-error-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n"))
-                       (decl--string-concat-and-keep to-return (concat "**** " "Error Message String" "\n"))
-                       (decl--string-concat-and-keep to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n"))
+                       (decl--concat! to-return (concat "**** " "Error Message String" "\n"))
+                       (decl--concat! to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Nodes failing because of failing dependencies\n")
+                     (decl--concat! to-return "** Nodes failing because of failing dependencies\n")
 
                      (cl-dolist (e failed-dependency-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Nodes involved in cyclical relationships\n")
+                     (decl--concat! to-return "** Nodes involved in cyclical relationships\n")
 
                      (cl-dolist (e cyclical-relationship-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Nodes relying on non-existent dependencies\n")
+                     (decl--concat! to-return "** Nodes relying on non-existent dependencies\n")
 
                      (cl-dolist (e non-existent-dependencies-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Non-existent dependencies\n")
+                     (decl--concat! to-return "** Non-existent dependencies\n")
 
                      (cl-dolist (e non-existent-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
-                     (decl--string-concat-and-keep to-return "** Null nodes\n")
+                     (decl--concat! to-return "** Null nodes\n")
 
                      (cl-dolist (e null-nodes)
-                       (decl--string-concat-and-keep to-return (concat "*** " (prin1-to-string e) "\n")))
+                       (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n")))
 
                      to-return))
 

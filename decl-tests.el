@@ -1,39 +1,32 @@
-(ert-deftest decl--test--decl--property-list-put-and-keep ()
-  "Tests the function DECL--PROPERTY-LIST-PUT-AND-KEEP"
+(ert-deftest decl--test--decl--plist-put! ()
+  "Tests the function DECL--PLIST-PUT!"
   (let ((temp nil))
-    (decl--property-list-put-and-keep temp :test 5)
+    (decl--plist-put! temp :test 5)
     (should (eq 5 (plist-get temp :test)))
-    (decl--property-list-put-and-keep temp :test 7)
+    (decl--plist-put! temp :test 7)
     (should (eq 7 (plist-get temp :test)))
-    (decl--property-list-put-and-keep temp :other 3)
+    (decl--plist-put! temp :other 3)
     (should (eq 3 (plist-get temp :other)))))
 
-(ert-deftest decl--test--decl--list-cons-and-keep ()
-  "Tests the function DECL--LIST-CONS-AND-KEEP"
+(ert-deftest decl--test--decl-cons! ()
+  "Tests the function DECL-CONS!"
   (let ((temp nil))
-    (should (equal (car (decl--list-cons-and-keep temp 6)) 6))
-    (decl--list-cons-and-keep temp "test")
+    (should (equal (car (decl-cons! temp 6)) 6))
+    (decl-cons! temp "test")
     (should (equal (car temp) "test"))
-    (decl--list-cons-and-keep temp :test)
+    (decl-cons! temp :test)
     (should (eq (car temp) :test))
-    (decl--list-cons-and-keep temp 6)
+    (decl-cons! temp 6)
     (should (eq (car temp) 6))
     (should (eq (length temp) 4))))
 
-(ert-deftest decl--test--decl--string-concat-and-keep ()
-  "Tests the function DECL--STRING-CONCAT-AND-KEEP"
+(ert-deftest decl--test--decl--concat! ()
+  "Tests the function DECL--CONCAT!"
   (let ((a "test")
         (b "other"))
-    (decl--string-concat-and-keep a b)
+    (decl--concat! a b)
     (should (equal "testother" a))
-    (should (equal "othertestother" (decl--string-concat-and-keep b a)))))
-
-(ert-deftest decl--test--decl--every-keywordp ()
-  "Tests the function DECL--EVERY-KEYWORDP"
-  (should (eq t (decl--every-keywordp '(:te :test :a :b :e))))
-  (should (eq nil (decl--every-keywordp '(nil :test :a))))
-  (should (eq nil (decl--every-keywordp '(defun :te))))
-  (should (eq nil (decl--every-keywordp '(5)))))
+    (should (equal "othertestother" (decl--concat! b a)))))
 
 (ert-deftest decl--test--decl--generate-increasing-number-string ()
   "Tests the function DECL--GENERATE-INCREASING-NUMBER-STRING"
@@ -42,13 +35,13 @@
     (dotimes (i 100) (decl--generate-increasing-number-string))
     (should (equal "102" (decl--generate-increasing-number-string)))))
 
-(ert-deftest decl--test--decl--property-list-keys () ; Relies on decl--property-list-put-and-keep
-  "Tests the function DECL--PROPERTY-LIST-KEYS"
+(ert-deftest decl--test--decl--plist-keys () ; Relies on decl--plist-put!
+  "Tests the function DECL--PLIST-KEYS"
   (let ((test-plist nil))
-    (decl--property-list-put-and-keep test-plist :other 78)
-    (should (equal '(:other) (decl--property-list-keys test-plist)))
-    (decl--property-list-put-and-keep test-plist :test 8)
-    (should (equal '(:test :other) (decl--property-list-keys test-plist)))))
+    (decl--plist-put! test-plist :other 78)
+    (should (equal '(:other) (decl--plist-keys test-plist)))
+    (decl--plist-put! test-plist :test 8)
+    (should (equal '(:test :other) (decl--plist-keys test-plist)))))
 
 (ert-deftest decl--test--decl-compare-plist-based-digraph-consisting-of-eq-able-elements ()
   "Tests the function DECL---COMPARE-PLIST-BASED-DIGRAPH-CONSISTING-OF-EQ-ABLE-ELEMENTS"
