@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -762,7 +762,9 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                      (cl-dolist (e failed-error-nodes)
                        (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n"))
                        (decl--concat! to-return (concat "**** " "Error Message String" "\n"))
-                       (decl--concat! to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message) "\n")))
+                       (decl--concat! to-return (concat "     "
+                                                        (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message)
+                                                        "\n")))
 
                      (decl--concat! to-return "** Nodes failing because of failing dependencies\n")
 
@@ -794,9 +796,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                (error "Attempted to refer to a decl-block that does not exist")))
 
             ;; These following lines make the newly created buffer an org-mode buffer and then indent the buffer accordingly
-            (org-mode)
-            (mark-whole-buffer)
-            (indent-region (region-beginning) (region-end)))
+            (org-mode))
 
           (switch-to-buffer (get-buffer buffer-name-status-report)))) ; End of TRUE condition of keywordp conditional
     (message "DECL-BLOCK-KEYWORD-NAME must be of the type keyword")))
