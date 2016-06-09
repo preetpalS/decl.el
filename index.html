@@ -35,6 +35,8 @@
 <li><p>Solve the decl-block.</p></li>
 </ol>
 
+<p>Optionally, use the interactive function <code>decl-report</code> for a report in an Org-mode buffer that describes how a decl-block was solved.</p>
+
 <h1>
 <a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h1>
 
@@ -70,7 +72,9 @@
               (lambda ()
                 (set-face-attribute 'default nil :font "consolas-14:antialias=natural"))
               '(:windows :gui))
-   (decl-solve :init)))
+   (decl-solve :init)
+   ; Optionally execute for a report on the solver's execution: (decl-report :init)
+   ))
 
 (provide 'init)
 
