@@ -19,16 +19,16 @@
     </section>
 
     <section class="main-content">
-      <h2>
-<a id="background" class="anchor" href="#background" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Background</h2>
+      <h1>
+<a id="background" class="anchor" href="#background" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Background</h1>
 
 <p>Configuring Emacs via writing Emacs Lisp can get compilicated especially when you want your Emacs configuration files to work across platforms such as Cygwin, Linux, Mac OS X and Windows and in both terminals and graphical user interfaces. If your configuration files are long and complicated you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking changes, debugging complications, and unwanted behaviour. decl.el is an attempt to alleviate some of these problems when configuring Emacs via Emacs Lisp code.</p>
 
-<h2>
-<a id="instructions" class="anchor" href="#instructions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions</h2>
+<h1>
+<a id="instructions" class="anchor" href="#instructions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions</h1>
 
-<h3>
-<a id="user-steps" class="anchor" href="#user-steps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>User Steps</h3>
+<h2>
+<a id="user-steps" class="anchor" href="#user-steps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>User Steps</h2>
 
 <ol>
 <li><p>Logically separate Emacs Lisp code portions in your configuration files by the functionality that they add or modify within Emacs. Keep note of any dependencies that those portions of code may have.</p></li>
@@ -38,36 +38,14 @@
 <li><p>Solve the decl-block.</p></li>
 </ol>
 
-<h3>
-<a id="solver-steps-disregard-if-you-are-not-interested-in-how-this-library-works-these-steps-occur-when-a-decl-block-is-solved-for-those-who-are-interested" class="anchor" href="#solver-steps-disregard-if-you-are-not-interested-in-how-this-library-works-these-steps-occur-when-a-decl-block-is-solved-for-those-who-are-interested" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Solver Steps <em>(Disregard if you are not interested in how this library works. These steps occur when a decl-block is solved for those who are interested.)</em>
-</h3>
+<h1>
+<a id="sample-usage" class="anchor" href="#sample-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample Usage</h1>
 
-<ol>
-<li><p>Disregard all unexecutable decl-nodes within decl-block. First find and disregard all nodes with non-existant nodes within their constraint lists. Second, taking into account all nodes with non-existing constraints, use Tarjan's Strongly Connected Components Algorithm to find and disregard all nodes involved in circular relationships of size greater than 1. Thirdly, disregard all remaining nodes which have themselves as one of their own constraints (circular relationships of size 1).</p></li>
-<li><p>Place all decl-nodes which have not been disregarded in a list.</p></li>
-<li><p>Keep on iterating over the list of decl-nodes, executing all nodes which have no remaining constraints. If the execution of a decl-node is successful, remove the decl-node's keyword name from all of the constraint lists of the remaining decl-nodes in the list. If the execution of a decl-node results in failure, remove all the decl-nodes in the list which have the executed decl-node's keyword name within their constraint list. Regardless of the success of a decl-node's execution, remove the executed decl-node from the list of nodes which have not been disregarded. If during one iteration over the list no decl-nodes are executed, stop iterating over the list.</p></li>
-</ol>
-
-<h2>
-<a id="code" class="anchor" href="#code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Code</h2>
-
-<p>Refer to decl.el</p>
-
-<h2>
-<a id="tests" class="anchor" href="#tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests</h2>
-
-<p>Refer to decl-tests.el</p>
-
-<h2>
-<a id="sample-usage" class="anchor" href="#sample-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample Usage</h2>
-
-<p>The following example assumes that you have installed this package via a package
-manager</p>
+<p>The following example assumes that you have installed this package via <a href="MELPA">melpa.org</a>:</p>
 
 <pre><code>;;; init.el --- sample init.el using library
 
 (package-initialize)
-(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
 (add-hook 
@@ -89,8 +67,6 @@ manager</p>
                                              (if (boundp 'old-fullscreen) old-fullscreen nil)
                                            (progn (setq old-fullscreen current-value)
                                                   'fullboth)))))
-
-                (base-lib-assign-keybindings '("C-s-&lt;268632070&gt;" toggle-fullscreen)) ; command-control-f
                 t)
               '(:gui :mac-osx))
    (decl-node :windows-consolas :init
