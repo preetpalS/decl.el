@@ -22,13 +22,10 @@
       <h1>
 <a id="background" class="anchor" href="#background" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Background</h1>
 
-<p>Configuring Emacs via writing Emacs Lisp can get compilicated especially when you want your Emacs configuration files to work across platforms such as Cygwin, Linux, Mac OS X and Windows and in both terminals and graphical user interfaces. If your configuration files are long and complicated you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking changes, debugging complications, and unwanted behaviour. decl.el is an attempt to alleviate some of these problems when configuring Emacs via Emacs Lisp code.</p>
+<p>Configuring Emacs can get complicated especially when you want your configuration to be cross-platform (to run without any issues on Linux, OpenBSD, OS X and Windows) and work in both terminals and graphical user interfaces. If your Emacs Lisp code is long and complicated, you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking your existing configuration and ultimately wasting your time. decl.el is an attempt to alleviate some of these problems when configuring Emacs using Emacs Lisp.</p>
 
 <h1>
-<a id="instructions" class="anchor" href="#instructions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions</h1>
-
-<h2>
-<a id="user-steps" class="anchor" href="#user-steps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>User Steps</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h1>
 
 <ol>
 <li><p>Logically separate Emacs Lisp code portions in your configuration files by the functionality that they add or modify within Emacs. Keep note of any dependencies that those portions of code may have.</p></li>
@@ -39,9 +36,9 @@
 </ol>
 
 <h1>
-<a id="sample-usage" class="anchor" href="#sample-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample Usage</h1>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h1>
 
-<p>The following example assumes that you have installed this package via <a href="MELPA">melpa.org</a>:</p>
+<p>The following example assumes that you have installed this package via <a href="MELPA">http://melpa.org</a> (alternatively just download and include the <code>decl.el</code> file manually from <a href="github">https://github.com/preetpalS/decl.el</a>):</p>
 
 <pre><code>;;; init.el --- sample init.el using library
 
