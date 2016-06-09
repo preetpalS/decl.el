@@ -52,7 +52,9 @@
 ;;               (lambda ()
 ;;                 (set-face-attribute 'default nil :font "consolas-14:antialias=natural"))
 ;;               '(:windows :gui))
-;;    (decl-solve :init)))
+;;    (decl-solve :init)
+;;    ; Optionally execute for a report on the solver's execution: (decl-report :init)
+;;    ))
 ;;
 ;; (provide 'init)
 ;;
