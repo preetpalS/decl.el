@@ -5,7 +5,7 @@ Library for organizing code declaratively.
 
 ## Background
 
-Configuring Emacs via writing Emacs Lisp can get compilicated especially when you want your Emacs configuration files to work across platforms such as Cygwin, Linux, Mac OS X and Windows and in both terminals and graphical user interfaces. If your configuration files are long and complicated you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking changes, debugging complications, and unwanted behaviour. decl.el is an attempt to alleviate some of these problems when configuring Emacs via Emacs Lisp code.
+Configuring Emacs can get complicated especially when you want your configuration to be cross-platform (to run without any issues on Linux, OpenBSD, OS X and Windows) and work in both terminals and graphical user interfaces. If your Emacs Lisp code is long and complicated, you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking your existing configuration and ultimately wasting your time. decl.el is an attempt to alleviate some of these problems when configuring Emacs using Emacs Lisp.
 
 ## Instructions
 
@@ -21,7 +21,7 @@ Configuring Emacs via writing Emacs Lisp can get compilicated especially when yo
 5. Solve the decl-block.
 
 ### Solver Steps *(Disregard if you are not interested in how this library works. These steps occur when a decl-block is solved for those who are interested.)*
-1. Disregard all unexecutable decl-nodes within decl-block. First find and disregard all nodes with non-existant nodes within their constraint lists. Second, taking into account all nodes with non-existing constraints, use Tarjan's Strongly Connected Components Algorithm to find and disregard all nodes involved in circular relationships of size greater than 1. Thirdly, disregard all remaining nodes which have themselves as one of their own constraints (circular relationships of size 1).
+1. Disregard all non-executable decl-nodes within decl-block. First find and disregard all nodes with non-existent nodes within their constraint lists. Second, taking into account all nodes with non-existing constraints, use Tarjan's Strongly Connected Components Algorithm to find and disregard all nodes involved in circular relationships of size greater than 1. Thirdly, disregard all remaining nodes which have themselves as one of their own constraints (circular relationships of size 1).
 
 2. Place all decl-nodes which have not been disregarded in a list.
 
@@ -37,8 +37,7 @@ Refer to decl-tests.el
 
 ## Sample Usage
 
-The following example assumes that you have installed this package via a package
-manager
+The following example assumes that you have installed this package via [http://melpa.org](MELPA) (alternatively just download and include the `decl.el` file manually from [https://github.com/preetpalS/decl.el](github)):
 
     ;;; init.el --- sample init.el using library
     
@@ -75,3 +74,4 @@ manager
     (provide 'init)
     
     ;;; init.el sample ends here
+
