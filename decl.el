@@ -24,7 +24,6 @@
 ;; ;;; init.el --- sample init.el using library
 ;;
 ;; (package-initialize)
-;; (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 ;; (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 ;;
 ;; (add-hook
@@ -47,7 +46,6 @@
 ;;                                            (progn (setq old-fullscreen current-value)
 ;;                                                   'fullboth)))))
 ;;
-;;                 (base-lib-assign-keybindings '("C-s-<268632070>" toggle-fullscreen)) ; command-control-f
 ;;                 t)
 ;;               '(:gui :mac-osx))
 ;;    (decl-node :windows-consolas :init
