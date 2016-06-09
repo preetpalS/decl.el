@@ -37,7 +37,7 @@ Refer to decl-tests.el
 
 ## Sample Usage
 
-The following example assumes that you have installed this package via [http://melpa.org](MELPA) (alternatively just download and include the `decl.el` file manually from [https://github.com/preetpalS/decl.el](github)):
+The following example assumes that you have installed this package via [http://melpa.org/](MELPA) (alternatively just download and include the `decl.el` file manually from [https://github.com/preetpalS/decl.el](github)):
 
     ;;; init.el --- sample init.el using library
     
