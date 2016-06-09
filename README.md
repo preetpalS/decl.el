@@ -5,7 +5,7 @@ Library for organizing code declaratively.
 
 ## Background
 
-Configuring Emacs can get complicated especially when you want your configuration to be cross-platform (to run without any issues on Linux, OpenBSD, OS X and Windows) and work in both terminals and graphical user interfaces. If your Emacs Lisp code is long and complicated, you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking your existing configuration and ultimately wasting your time. decl.el is an attempt to alleviate some of these problems when configuring Emacs using Emacs Lisp.
+Configuring Emacs can get complicated especially when you want your configuration to be cross-platform (to run without any issues on FreeBSD, Linux, OpenBSD, OS X and Windows) and work in both terminals and graphical user interfaces. If your Emacs Lisp code is long and complicated, you might become reluctant to modify or add functionality to Emacs due to the possibility of breaking your existing configuration and ultimately wasting your time. decl.el is an attempt to alleviate some of these problems when configuring Emacs using Emacs Lisp.
 
 ## Instructions
 
