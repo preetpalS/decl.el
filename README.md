@@ -20,6 +20,8 @@ Configuring Emacs can get complicated especially when you want your configuratio
 
 5. Solve the decl-block.
 
+Optionally, use the interactive function `decl-report` for a report in an Org-mode buffer that describes how a decl-block was solved.
+
 ### Solver Steps *(Disregard if you are not interested in how this library works. These steps occur when a decl-block is solved for those who are interested.)*
 1. Disregard all non-executable decl-nodes within decl-block. First find and disregard all nodes with non-existent nodes within their constraint lists. Second, taking into account all nodes with non-existing constraints, use Tarjan's Strongly Connected Components Algorithm to find and disregard all nodes involved in circular relationships of size greater than 1. Thirdly, disregard all remaining nodes which have themselves as one of their own constraints (circular relationships of size 1).
 
