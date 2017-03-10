@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -489,6 +489,19 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                                               :successful))))))
       (error "Attempting to execute a decl--node that has already been executed!"))))
 
+(defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex plist-of-nodes directed-graph-from-dependencies-to-nodes directed-graph-from-nodes-to-dependencies &optional failure-status)
+  "vertex is a decl--node."
+  (let ((e-keyword (oref vertex keyword-name)))
+    (cl-dolist (dependent-node-keyword (plist-get
+                                        directed-graph-from-dependencies-to-nodes
+                                        e-keyword))
+      (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
+        (when (eq (oref ee execution-status) :null)
+          (oset ee
+                execution-status (if failure-status failure-status :failed-via-failed-dependency))
+          (decl--decl--block--solve--mark-as-not-executable-recursively ee plist-of-nodes directed-graph-from-dependencies-to-nodes directed-graph-from-nodes-to-dependencies failure-status))
+        )))) ;; End of defun
+
 (defmethod decl--decl--block--solve ((this decl--block))
   (decl--decl--block--generate-data-structures-and-results this)
   (when decl-config-print-execution-status-messages
@@ -505,18 +518,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
         (directed-graph-from-nodes-to-dependencies
           (decl--decl--block--access-item-from-generated-data-structures-and-results
            this :directed-graph-from-nodes-to-dependencies)))
-    (defun decl--decl--block--solve--mark-as-not-executable-recursively (vertex &optional failure-status)
-      "vertex is a decl--node."
-      (let ((e-keyword (oref vertex keyword-name)))
-        (cl-dolist (dependent-node-keyword (plist-get
-                                         directed-graph-from-dependencies-to-nodes
-                                         e-keyword))
-          (let ((ee (plist-get plist-of-nodes dependent-node-keyword)))
-            (when (eq (oref ee execution-status) :null)
-              (oset ee
-                    execution-status (if failure-status failure-status :failed-via-failed-dependency))
-              (decl--decl--block--solve--mark-as-not-executable-recursively ee failure-status))
-            )))) ;; End of defun
+
     (let ((non-existent-constraint-symbols (decl--decl--block--find-non-existent-dependencies this)))
       (cl-dolist (e non-existent-constraint-symbols)
         (oset
@@ -551,7 +553,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
             (when (memq (oref e keyword-name) symbols-of-nodes-that-have-non-existent-constraints)
               (when (eq :null (oref e execution-status))
                 (oset e execution-status :depends-on-non-existent-constraint)
-                (decl--decl--block--solve--mark-as-not-executable-recursively e :depends-on-non-existent-constraint))))
+                (decl--decl--block--solve--mark-as-not-executable-recursively e plist-of-nodes directed-graph-from-dependencies-to-nodes directed-graph-from-nodes-to-dependencies :depends-on-non-existent-constraint))))
           (cl-dolist (e nodes)
             (when (or
                    (memq (oref e keyword-name) circular-dependent-node-symbols)
@@ -564,7 +566,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                    (memq (oref e keyword-name) (oref e keyword-names-of-dependencies)))
               (when (eq :null (oref e execution-status))
                 (oset e execution-status :involved-in-cyclical-relationship)
-                (decl--decl--block--solve--mark-as-not-executable-recursively e :involved-in-cyclical-relationship))))
+                (decl--decl--block--solve--mark-as-not-executable-recursively e plist-of-nodes directed-graph-from-dependencies-to-nodes directed-graph-from-nodes-to-dependencies :involved-in-cyclical-relationship))))
           (let ((decl-num-iter 0))
             (while (and (not (decl--decl--block--has-fate-been-determined this))
                         (not (> decl-num-iter 0)))
@@ -585,7 +587,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
                                     keyword-names-of-dependencies
                                     (-reject (lambda (x) (eq x e-keyword)) (oref ee keyword-names-of-dependencies)))
                               )))
-                      (decl--decl--block--solve--mark-as-not-executable-recursively node))
+                      (decl--decl--block--solve--mark-as-not-executable-recursively node plist-of-nodes directed-graph-from-dependencies-to-nodes directed-graph-from-nodes-to-dependencies))
                     ))))) ; End of while of execution of node
           ))))
 
