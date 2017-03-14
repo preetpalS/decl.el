@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 1.0.2
+;; Version: 1.0.3
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -202,6 +202,49 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
 
 ;; This is the only function that is called to find cycles outside of the
 ;; portion of code dedicated to finding cycles in a directed graph.
+(defun decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect (v index s sccs graph)
+  "v is a vertex (plist with existing :value key)."
+  (decl--plist-put! v :index index)
+  (decl--plist-put! v :lowlink index)
+  (cl-incf index)
+  (decl-cons! s v)
+
+  (cl-dolist (edge (oref graph edges))
+    (when (eq (plist-get edge :start) (plist-get v :value))
+      (let ((w ; w is another vertex, specifically
+             (-first
+              (lambda (x) "Used to find vertex that is :end in an edge"
+                (eq (plist-get x :value) (plist-get edge :end)))
+              (oref graph vertices))))
+        (if (eq (plist-get w :index) nil)
+            (progn ; Successor w has not yet been visited; recurse on it
+              (let ((triplet (decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect w index s sccs graph)))
+                (setq index (nth 0 triplet))
+                (setq s (nth 1 triplet))
+                (setq sccs (nth 2 triplet))
+                (decl--plist-put! v :index (min (plist-get v :lowlink)
+                                                (plist-get w :lowlink)))))
+          (cl-dolist (e s) ; Successor w is in stack S and hence in the current SCC
+            (when (eq (plist-get e :value) (plist-get w :value))
+              (decl--plist-put! v :lowlink (min (plist-get v :lowlink)
+                                                (plist-get w :index)))))
+          )) ; End of let that defines the end vertex w
+      )) ; End of cl-dolist that iterates over the edges in the graph
+
+  (if (eq (plist-get v :lowlink) (plist-get v :index)) ; If v is a root node, pop the stack and generate an SCC
+      (let ((scc nil)
+            (w nil))
+        (catch 'break
+          (while t
+            (setq w (car s)) ; set w to be the top element in s
+            (setq s (cdr s)) ; pop the top element off the stack s
+            (decl-cons! scc w)
+            (when (eq (plist-get w :value) (plist-get v :value))
+              (throw 'break nil))))
+
+        (decl-cons! sccs scc))) ; End of if that creates and scc
+  `(,index ,s ,sccs))
+
 (defun decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements (g)
   "G is a plist graph (eq-able elements key to a list of the same type of elements as the key)."
   (let ((index 0)
@@ -209,49 +252,13 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
         (sccs nil)
         (graph
          (decl---digraph-create-from-plist-based-digraph-consisting-of-eq-able-elements g)))
-    (defun decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect (v)
-      "v is a vertex (plist with existing :value key)."
-      (decl--plist-put! v :index index)
-      (decl--plist-put! v :lowlink index)
-      (cl-incf index)
-      (decl-cons! s v)
-
-      (cl-dolist (edge (oref graph edges))
-        (when (eq (plist-get edge :start) (plist-get v :value))
-          (let ((w ; w is another vertex, specifically
-                 (-first
-                  (lambda (x) "Used to find vertex that is :end in an edge"
-                    (eq (plist-get x :value) (plist-get edge :end)))
-                  (oref graph vertices))))
-            (if (eq (plist-get w :index) nil)
-                (progn ; Successor w has not yet been visited; recurse on it
-                  (decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect w)
-                  (decl--plist-put! v :index (min (plist-get v :lowlink)
-                                                                  (plist-get w :lowlink))))
-              (cl-dolist (e s) ; Successor w is in stack S and hence in the current SCC
-                (when (eq (plist-get e :value) (plist-get w :value))
-                  (decl--plist-put! v :lowlink (min (plist-get v :lowlink)
-                                                                    (plist-get w :index)))))
-              )) ; End of let that defines the end vertex w
-          )) ; End of cl-dolist that iterates over the edges in the graph
-
-      (if (eq (plist-get v :lowlink) (plist-get v :index)) ; If v is a root node, pop the stack and generate an SCC
-          (let ((scc nil)
-                (w nil))
-            (catch 'break
-              (while t
-                (setq w (car s)) ; set w to be the top element in s
-                (setq s (cdr s)) ; pop the top element off the stack s
-                (decl-cons! scc w)
-                (when (eq (plist-get w :value) (plist-get v :value))
-                  (throw 'break nil))))
-
-            (decl-cons! sccs scc))) ; End of if that creates and scc
-      )
 
     (cl-dolist (vertex (oref graph vertices))
       (when (eq (plist-get vertex :index) nil)
-        (decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect vertex)))
+        (let ((triplet (decl---tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements--strong-connect vertex index s sccs graph)))
+                    (setq index (nth 0 triplet))
+                    (setq s (nth 1 triplet))
+                    (setq sccs (nth 2 triplet)))))
     sccs))
 ;; End of the code finds cycles in a digraph.
 
