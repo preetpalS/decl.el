@@ -68,7 +68,7 @@ WARNING 2: Only 'visually' verified!"
               '(((:value 3 :index 2 :lowlink 2)) ((:value 1 :index 2 :lowlink 2) (:value 2 :index 4 :lowlink 3)) ((:value 4 :index 1 :lowlink 1)) ((:value 5 :index 0 :lowlink 0)))
               )
              t))
-    (should 
+    (should
      (eq
       (cl-tree-equal
        (decl--tarjan-strongly-connected-components-algorithm-for-plist-based-digraph-consisting-of-eq-able-elements

@@ -42,11 +42,11 @@ Refer to decl-tests.el
 The following example assumes that you have installed this package via [http://melpa.org/](MELPA) (alternatively just download and include the `decl.el` file manually from [https://github.com/preetpalS/decl.el/](github)):
 
     ;;; init.el --- sample init.el using library
-    
+
     (package-initialize)
     (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
-    
-    (add-hook 
+
+    (add-hook
      'after-init-hook
      (lambda () "Your init file"
        (require 'decl)
@@ -74,8 +74,40 @@ The following example assumes that you have installed this package via [http://m
        (decl-solve :init)
        ; Optionally execute for a report on the solver's execution: (decl-report :init)
        ))
-    
+
     (provide 'init)
-    
+
     ;;; init.el sample ends here
 
+## Possible future improvements
+
+The follow Emacs lisp comment has some ideas that I initially had but
+never got around to implementing yet. Contributions are welcome 😊
+(although the existing solver implementation may need some serious
+refactoring to implement some of these features).
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; decl.el TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;  1. Add the ability to have targets so that the library can actually be used as a      ;;    ;;
+    ;;     make alternative.                                                                  ;;    ;;
+    ;;                                                                                        ;;    ;;
+    ;;  2. Make org-mode buffer for decl-report read-only and make it properly indented.      ;;    ;;
+    ;;                                                                                        ;;    ;;
+    ;;  3. Have proper testing of this package (that does not depend on visual                ;;    ;;
+    ;;     verification...)                                                                   ;;    ;;
+    ;;                                                                                        ;;    ;;
+    ;;  4. Make better use of naming (especially for private function and variables).         ;;    ;;
+    ;;                                                                                        ;;    ;;
+    ;;  5. Make library pausable and interruptable.                                           ;;    ;;
+    ;;                                                                                        ;;    ;;
+    ;;  6. Negative dependencies (execute decl-node only if another decl-node's execution     ;;    ;;
+    ;;     fails).                                                                            ;;    ;;
+    ;;                                                                                        ;;    ;;
+    ;;  7. Concurrency. Deal with the ability to execute nodes in parallel. Add the ability   ;;    ;;
+    ;;     to specify whether the default is to specify whether nodes should be executed in   ;;    ;;
+    ;;     parallel by default (i.e. independent blocks of code) or whether the default       ;;    ;;
+    ;;     should be serial execution unless specified otherwise. There should be a way to    ;;    ;;
+    ;;     combine commands through an API that allows for specific commands to be combined   ;;    ;;
+    ;;     and fed to something else to be parallelized externally (like independent source   ;;    ;;
+    ;;     files being compiled in parallel by a single compiler instance instead of invoking ;;    ;;
+    ;;     multiple instances of a compiler (via running shell commands in parallel)).        ;;    ;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
