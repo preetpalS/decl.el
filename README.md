@@ -41,43 +41,45 @@ Refer to decl-tests.el
 
 The following example assumes that you have installed this package via [http://melpa.org/](MELPA) (alternatively just download and include the `decl.el` file manually from [https://github.com/preetpalS/decl.el/](github)):
 
-    ;;; init.el --- sample init.el using library
+``` elisp
+;;; init.el --- sample init.el using library
 
-    (package-initialize)
-    (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(package-initialize)
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
-    (add-hook
-     'after-init-hook
-     (lambda () "Your init file"
-       (require 'decl)
-       (decl-block :init)
-       (decl-node :mac-osx :init (lambda () (eq system-type 'darwin)))
-       (decl-node :windows :init (lambda () (eq system-type 'windows-nt)))
-       (decl-node :linux :init (lambda () (eq system-type 'gnu/linux)))
-       (decl-node :gui :init (lambda () (if window-system t nil)))
-       (decl-node :mac-osx-fullscreen-supprt :init
-                  (lambda ()
-                    (defun toggle-fullscreen (&optional f)
-                      (interactive)
-                      (let ((current-value (frame-parameter nil 'fullscreen)))
-                        (set-frame-parameter nil 'fullscreen
-                                             (if (equal 'fullboth current-value)
-                                                 (if (boundp 'old-fullscreen) old-fullscreen nil)
-                                               (progn (setq old-fullscreen current-value)
-                                                      'fullboth)))))
-                    t)
-                  '(:gui :mac-osx))
-       (decl-node :windows-consolas :init
-                  (lambda ()
-                    (set-face-attribute 'default nil :font "consolas-14:antialias=natural"))
-                  '(:windows :gui))
-       (decl-solve :init)
-       ; Optionally execute for a report on the solver's execution: (decl-report :init)
-       ))
+(add-hook
+ 'after-init-hook
+ (lambda () "Your init file"
+   (require 'decl)
+   (decl-block :init)
+   (decl-node :mac-osx :init (lambda () (eq system-type 'darwin)))
+   (decl-node :windows :init (lambda () (eq system-type 'windows-nt)))
+   (decl-node :linux :init (lambda () (eq system-type 'gnu/linux)))
+   (decl-node :gui :init (lambda () (if window-system t nil)))
+   (decl-node :mac-osx-fullscreen-supprt :init
+              (lambda ()
+                (defun toggle-fullscreen (&optional f)
+                  (interactive)
+                  (let ((current-value (frame-parameter nil 'fullscreen)))
+                    (set-frame-parameter nil 'fullscreen
+                                         (if (equal 'fullboth current-value)
+                                             (if (boundp 'old-fullscreen) old-fullscreen nil)
+                                           (progn (setq old-fullscreen current-value)
+                                                  'fullboth)))))
+                t)
+              '(:gui :mac-osx))
+   (decl-node :windows-consolas :init
+              (lambda ()
+                (set-face-attribute 'default nil :font "consolas-14:antialias=natural"))
+              '(:windows :gui))
+   (decl-solve :init)
+   ; Optionally execute for a report on the solver's execution: (decl-report :init)
+   ))
 
-    (provide 'init)
+(provide 'init)
 
-    ;;; init.el sample ends here
+;;; init.el sample ends here
+```
 
 ## Possible future improvements
 
@@ -86,37 +88,39 @@ never got around to implementing yet. Contributions are welcome 😊
 (although the existing solver implementation may need some serious
 refactoring to implement some of these features).
 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; decl.el TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;  1. Add the ability to have targets so that the library can actually be used as a      ;;    ;;
-    ;;     make alternative.                                                                  ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  2. Make org-mode buffer for decl-report read-only and make it properly indented.      ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  3. Have proper testing of this package (that does not depend on visual                ;;    ;;
-    ;;     verification...)                                                                   ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  4. Make better use of naming (especially for private function and variables).         ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  5. Allow for execution of `decl-solve' to be paused and/or interrupted.               ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  6. Negative dependencies (execute decl-node only if another decl-node's execution     ;;    ;;
-    ;;     fails).                                                                            ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  7. Concurrency. Deal with the ability to execute nodes in parallel. Add the ability   ;;    ;;
-    ;;     to specify whether the default is to specify whether nodes should be executed in   ;;    ;;
-    ;;     parallel by default (i.e. independent blocks of code) or whether the default       ;;    ;;
-    ;;     should be serial execution unless specified otherwise. There should be a way to    ;;    ;;
-    ;;     combine commands through an API that allows for specific commands to be combined   ;;    ;;
-    ;;     and fed to something else to be parallelized externally (like independent source   ;;    ;;
-    ;;     files being compiled in parallel by a single compiler instance instead of invoking ;;    ;;
-    ;;     multiple instances of a compiler (via running shell commands in parallel)).        ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  8. Track source file locations of `decl-node' definitions (unless in mini-buffer?) so ;;    ;;
-    ;;     that the org-mode buffer generated by `decl-report' can have links back to source. ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;;  9. Investigate how to appropriately add instrumentation to track performance- and     ;;    ;;
-    ;;     usage-related metrics.                                                             ;;    ;;
-    ;;                                                                                        ;;    ;;
-    ;; 10. Investigate if this library would benefit from having direct support for           ;;    ;;
-    ;;     asynchronous execution.                                                            ;;    ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+``` emacs lisp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; decl.el TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  1. Add the ability to have targets so that the library can actually be used as a      ;;    ;;
+;;     make alternative.                                                                  ;;    ;;
+;;                                                                                        ;;    ;;
+;;  2. Make org-mode buffer for decl-report read-only and make it properly indented.      ;;    ;;
+;;                                                                                        ;;    ;;
+;;  3. Have proper testing of this package (that does not depend on visual                ;;    ;;
+;;     verification...)                                                                   ;;    ;;
+;;                                                                                        ;;    ;;
+;;  4. Make better use of naming (especially for private function and variables).         ;;    ;;
+;;                                                                                        ;;    ;;
+;;  5. Allow for execution of `decl-solve' to be paused and/or interrupted.               ;;    ;;
+;;                                                                                        ;;    ;;
+;;  6. Negative dependencies (execute decl-node only if another decl-node's execution     ;;    ;;
+;;     fails).                                                                            ;;    ;;
+;;                                                                                        ;;    ;;
+;;  7. Concurrency. Deal with the ability to execute nodes in parallel. Add the ability   ;;    ;;
+;;     to specify whether the default is to specify whether nodes should be executed in   ;;    ;;
+;;     parallel by default (i.e. independent blocks of code) or whether the default       ;;    ;;
+;;     should be serial execution unless specified otherwise. There should be a way to    ;;    ;;
+;;     combine commands through an API that allows for specific commands to be combined   ;;    ;;
+;;     and fed to something else to be parallelized externally (like independent source   ;;    ;;
+;;     files being compiled in parallel by a single compiler instance instead of invoking ;;    ;;
+;;     multiple instances of a compiler (via running shell commands in parallel)).        ;;    ;;
+;;                                                                                        ;;    ;;
+;;  8. Track source file locations of `decl-node' definitions (unless in mini-buffer?) so ;;    ;;
+;;     that the org-mode buffer generated by `decl-report' can have links back to source. ;;    ;;
+;;                                                                                        ;;    ;;
+;;  9. Investigate how to appropriately add instrumentation to track performance- and     ;;    ;;
+;;     usage-related metrics.                                                             ;;    ;;
+;;                                                                                        ;;    ;;
+;; 10. Investigate if this library would benefit from having direct support for           ;;    ;;
+;;     asynchronous execution.                                                            ;;    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+```
