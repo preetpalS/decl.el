@@ -333,7 +333,7 @@ must be :successful for the stored lambda to be executed.")
     :type string
     :documentation "A place to store error messages from execution of stored lambda function.")))
 
-(defmethod decl--decl--block--has-fate-been-determined ((this decl--block))
+(cl-defmethod decl--decl--block--has-fate-been-determined ((this decl--block))
   "Iterates through the given decl--block's nodes slot and returns true if and
 only if all members of the list have their execution-status slot not set to :null."
   (catch 'return
@@ -343,7 +343,7 @@ only if all members of the list have their execution-status slot not set to :nul
           (throw 'return nil)))
       (throw 'return t))))
 
-(defmethod decl--decl--block--generate-data-structures-and-results
+(cl-defmethod decl--decl--block--generate-data-structures-and-results
   ((this decl--block))
   "This method builds the plist contained in the given decl--block's
 'generated-data-structures-and-results' slot.
@@ -438,7 +438,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
 
     (oset this generated-data-structures-and-results generated-data-structures-and-results)))
 
-(defmethod decl--decl--block--access-item-from-generated-data-structures-and-results
+(cl-defmethod decl--decl--block--access-item-from-generated-data-structures-and-results
   ((this decl--block) keyword-key)
   (if (keywordp keyword-key)
       (plist-get
@@ -446,7 +446,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
        keyword-key)
     (error "Only keys of the type keyword are allowed to access values from generated-data-structures-and-results")))
 
-(defmethod decl--decl--block--find-non-existent-dependencies
+(cl-defmethod decl--decl--block--find-non-existent-dependencies
   ((this decl--block))
   (let ((list-of-dependency-keyword-names
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :list-of-dependency-keyword-names))
@@ -454,7 +454,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
          (decl--decl--block--access-item-from-generated-data-structures-and-results this :list-of-node-keyword-names)))
     (-difference list-of-dependency-keyword-names list-of-node-keyword-names)))
 
-(defmethod decl--decl--block--keyword-names-of-nodes-with-non-existent-constraints
+(cl-defmethod decl--decl--block--keyword-names-of-nodes-with-non-existent-constraints
   ((this decl--block))
   (let
       ((to-return nil)
@@ -466,7 +466,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
       (decl-cons! to-return (plist-get directed-graph-from-dependencies-to-nodes e)))
     (-uniq (-flatten to-return))))
 
-(defmethod decl--decl--node--execute ((this decl--node))
+(cl-defmethod decl--decl--node--execute ((this decl--node))
   (let ((execution-status (oref this execution-status))
         (stored-lambda (oref this lambda-function-that-only-returns-t-or-nil-depending-on-node-execution)))
     (when decl-config-print-execution-status-messages
@@ -509,7 +509,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
           (decl--decl--block--solve--mark-as-not-executable-recursively ee plist-of-nodes directed-graph-from-dependencies-to-nodes directed-graph-from-nodes-to-dependencies failure-status))
         )))) ;; End of defun
 
-(defmethod decl--decl--block--solve ((this decl--block))
+(cl-defmethod decl--decl--block--solve ((this decl--block))
   (decl--decl--block--generate-data-structures-and-results this)
   (when decl-config-print-execution-status-messages
     (print (concat "Loading decl-block '"
