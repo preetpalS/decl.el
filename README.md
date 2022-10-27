@@ -84,16 +84,16 @@ The following example assumes that you have installed this package via [http://m
 ## Possible future improvements
 
 The follow Emacs lisp comment has some ideas that I initially had but
-never got around to implementing yet. Contributions are welcome 😊
-(although the existing solver implementation may need some serious
-refactoring to implement some of these features).
+never got around to implementing yet. Contributions are welcome
+(although the existing solver implementation may need refactoring to
+implement some of these features).
 
 ``` emacs lisp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; decl.el TODO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  1. Add the ability to have targets so that the library can actually be used as a      ;;    ;;
 ;;     make alternative.                                                                  ;;    ;;
 ;;                                                                                        ;;    ;;
-;;  2. Make org-mode buffer for decl-report read-only and make it properly indented.      ;;    ;;
+;;  2. Make org-mode buffer for decl-report read-only.                                    ;;    ;;
 ;;                                                                                        ;;    ;;
 ;;  3. Have proper testing of this package (that does not depend on visual                ;;    ;;
 ;;     verification...)                                                                   ;;    ;;
