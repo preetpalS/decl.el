@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 1.0.5
+;; Version: 1.0.6
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -771,8 +771,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
                      (cl-dolist (e failed-error-nodes)
                        (decl--concat! to-return (concat "*** " (prin1-to-string e) "\n"))
                        (decl--concat! to-return (concat "**** " "Error Message String" "\n"))
-                       (decl--concat! to-return (concat "     "
-                                                        (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message)
+                       (decl--concat! to-return (concat (oref (plist-get (decl--decl--block--access-item-from-generated-data-structures-and-results decl-exec-block :plist-of-nodes) e) execution-error-message)
                                                         "\n")))
 
                      (decl--concat! to-return "** Nodes failing because of failing dependencies\n")
