@@ -222,8 +222,8 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
                 (setq index (nth 0 triplet))
                 (setq s (nth 1 triplet))
                 (setq sccs (nth 2 triplet))
-                (decl--plist-put! v :index (min (plist-get v :lowlink)
-                                                (plist-get w :lowlink)))))
+                (decl--plist-put! v :lowlink (min (plist-get v :lowlink)
+                                                  (plist-get w :lowlink)))))
           (cl-dolist (e s) ; Successor w is in stack S and hence in the current SCC
             (when (eq (plist-get e :value) (plist-get w :value))
               (decl--plist-put! v :lowlink (min (plist-get v :lowlink)
