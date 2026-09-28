@@ -2,7 +2,7 @@
 
 ;; Author: Preetpal S. Sohal
 ;; URL: https://github.com/preetpalS/decl.el
-;; Version: 1.0.7
+;; Version: 1.0.8
 ;; Package-Requires: ((dash "2.5.0") (emacs "24.3") (cl-lib "0.3"))
 ;; License: GNU General Public License Version 3
 
@@ -197,7 +197,7 @@ Let e be any eq-able element. A plist-based digraph looks like the following: '(
                   (decl--plist-put! edge :end e2)
                   (decl-cons! edges edge)))))))
 
-      (decl---digraph (decl--generate-increasing-number-string)
+      (decl---digraph :object-name (decl--generate-increasing-number-string)
                       :edges edges :vertices vertices))))
 
 ;; This is the only function that is called to find cycles outside of the
@@ -530,7 +530,7 @@ The keyword :directed-graph-from-dependencies-to-nodes..."
       (cl-dolist (e non-existent-constraint-symbols)
         (oset
          this nodes
-         (cons (decl--node (decl--generate-increasing-number-string)
+         (cons (decl--node :object-name (decl--generate-increasing-number-string)
                            :keyword-name e
                            :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution (lambda () "Dummy nil function." nil))
                (oref this nodes)))
@@ -644,7 +644,7 @@ DECL-BLOCK-KEYWORD-NAME must be a keyword.
 
   (decl--attempt-to-store-decl-block
    decl-block-keyword-name
-   (decl--block (decl--generate-increasing-number-string)
+   (decl--block :object-name (decl--generate-increasing-number-string)
                 :keyword-name decl-block-keyword-name)))
 
 ;;;###autoload
@@ -691,7 +691,7 @@ DEPENDENCIES must be a list of keywords.
         (error "Argument DEPENDENCIES must be a list!")))
 
     (oset decl-block-of-interest nodes
-          (cons (decl--node (decl--generate-increasing-number-string)
+          (cons (decl--node :object-name (decl--generate-increasing-number-string)
                             :keyword-name decl-node-keyword-name
                             :lambda-function-that-only-returns-t-or-nil-depending-on-node-execution lambda-function-that-only-returns-t-or-nil-depending-on-node-execution
                             :keyword-names-of-dependencies dependencies)
